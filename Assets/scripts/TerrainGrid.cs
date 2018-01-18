@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class TerrainGrid : MonoBehaviour {
+	public Terrain terrain; //terrain grid is attached to
+	private Vector3 terrainOrigin;
 	public float cellSize = 1;
 	public int gridWidth = 10;
 	public int gridHeight = 10;
@@ -12,8 +14,17 @@ public class TerrainGrid : MonoBehaviour {
 
 	private GameObject[] _cells;
 	private float[] _heights;
+	private Vector3 gridOrigin;
 
 	void Start() {
+		terrainOrigin = terrain.transform.position;
+
+		// align current game object position to grid
+		alignPosition ();
+
+		gridOrigin = new Vector3(0-gridWidth/2 - cellSize/2, 0, 0-gridHeight/2 - cellSize/2);
+
+
 		// create mesh for each grid
 		_cells = new GameObject[gridHeight * gridWidth];
 		_heights = new float[(gridHeight + 1) * (gridWidth + 1)];
@@ -25,24 +36,47 @@ public class TerrainGrid : MonoBehaviour {
 		}
 		// adjust size and position according setting and parent(terrain)
 		UpdateSize();
-		UpdatePosition();
+		//UpdatePosition();
 		UpdateHeights();
 		UpdateCells ();
 	}
 
 	void Update () {
 		UpdateSize();
-		UpdatePosition();
+		//UpdatePosition();
 		UpdateHeights();
 		UpdateCells();
 	}
 
+	void alignPosition(){
+		Vector3 p= new Vector3(transform.position.z, transform.position.y, transform.position.x);
+		float x1 = transform.position.x - terrainOrigin.x;
+		print ("x1=" + x1);
+		float m = x1 % cellSize;
+		print("m="+m);
+
+		if (m != 0){
+			p.x = x1 - m + cellSize/2;
+		}
+
+		float z1 = transform.position.z - terrainOrigin.z;
+		print ("z1=" + z1);
+		float m2 = z1 % cellSize;
+		print("m2="+m2);
+
+		if (m2 != 0){
+			p.z = z1 - m2 + cellSize/2;
+		}
+		transform.position = p;
+	}
 	GameObject CreateChild() {
 		GameObject go = new GameObject();
 
 		go.name = "Grid Cell";
 		go.transform.parent = transform;
-		go.transform.localPosition = Vector3.zero;
+
+		go.transform.localPosition = gridOrigin;
+		//go.transform.localPosition = Vector3.zero;
 		go.AddComponent<MeshRenderer>();
 		go.AddComponent<MeshFilter>().mesh = CreateMesh();
 
@@ -102,8 +136,9 @@ public class TerrainGrid : MonoBehaviour {
 
 		for (int z = 0; z < gridHeight + 1; z++) {
 			for (int x = 0; x < gridWidth + 1; x++) {
-				origin = new Vector3(x * cellSize, 200, z * cellSize);
-				Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Terrain"));
+				origin = new Vector3(x * cellSize + gridOrigin.x, 200, z * cellSize + gridOrigin.z);
+
+				Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Terrain"));
 				//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity);
 
 
@@ -126,11 +161,15 @@ public class TerrainGrid : MonoBehaviour {
 		}
 	}
 
+	Vector3 getGridCenterLocalPosition(int x, int z){
+		return 	new Vector3(x * cellSize + gridOrigin.x+ cellSize/2, 200, z * cellSize + gridOrigin.z+ cellSize/2);
+
+	}
 	bool IsCellValid(int x, int z) {
 		RaycastHit hitInfo;
-		Vector3 origin = new Vector3(x * cellSize + cellSize/2, 200, z * cellSize + cellSize/2);
+		Vector3 origin = getGridCenterLocalPosition(x,z);
 		//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Buildings"));
-		Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Tree"));
+		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Tree"));
 		bool a = hitInfo.collider == null;
 		if (hitInfo.collider)
 			print("isvalid:"+hitInfo.collider.gameObject.name);
@@ -180,5 +219,15 @@ public class TerrainGrid : MonoBehaviour {
 
 	Vector3 MeshVertex(int x, int z) {
 		return new Vector3(x * cellSize, _heights[z * (gridWidth + 1) + x] + yOffset, z * cellSize);
+	}
+
+	public Vector3 GetWorldPosition(Vector3 gridPosition)
+	{
+		return new Vector3(terrainOrigin.z + (gridPosition.x * cellSize), terrainOrigin.y, terrainOrigin.x + (gridPosition.y * cellSize));
+	}
+
+	public Vector2 GetGridPosition(Vector3 worldPosition)
+	{
+		return new Vector2(worldPosition.z / cellSize, worldPosition.x / cellSize);
 	}
 }
