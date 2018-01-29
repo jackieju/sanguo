@@ -6,7 +6,7 @@ public class Game : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		print ("====start");
+		print ("====start game");
 		//Debug.Log ("====start2");
 	}
 	

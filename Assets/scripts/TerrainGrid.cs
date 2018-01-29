@@ -17,12 +17,13 @@ public class TerrainGrid : MonoBehaviour {
 	private Vector3 gridOrigin;
 
 	void Start() {
+		print ("start grid");
 		terrainOrigin = terrain.transform.position;
 
 		// align current game object position to grid
 		alignPosition ();
 
-		gridOrigin = new Vector3(0-gridWidth/2 - cellSize/2, 0, 0-gridHeight/2 - cellSize/2);
+		gridOrigin = new Vector3(0-gridWidth*cellSize/2 - cellSize/2, 0, 0-gridHeight*cellSize/2 - cellSize/2);
 
 
 		// create mesh for each grid
@@ -34,18 +35,40 @@ public class TerrainGrid : MonoBehaviour {
 				_cells[z * gridWidth + x] = CreateChild();
 			}
 		}
+		print ("test update");
 		// adjust size and position according setting and parent(terrain)
 		UpdateSize();
 		//UpdatePosition();
 		UpdateHeights();
 		UpdateCells ();
+
+		for (int z = 0; z < gridHeight; z++) {
+			for (int x = 0; x < gridWidth; x++) {
+				GameObject cell = _cells[z * gridWidth + x];
+			
+				cell.AddComponent<MeshCollider>();
+			}
+		}
+
+
+		print ("start complete");
 	}
 
 	void Update () {
+		return;
+		print (this._cells);
+
 		UpdateSize();
 		//UpdatePosition();
 		UpdateHeights();
 		UpdateCells();
+	}
+
+	void OnMouseDown(){
+		if (Input.GetMouseButtonDown (0)) {
+			print ("ok");
+		}
+
 	}
 
 	void alignPosition(){
@@ -79,12 +102,22 @@ public class TerrainGrid : MonoBehaviour {
 		//go.transform.localPosition = Vector3.zero;
 		go.AddComponent<MeshRenderer>();
 		go.AddComponent<MeshFilter>().mesh = CreateMesh();
+		//go.AddComponent<MeshCollider>();
+		//MeshCollider meshc = go.AddComponent(typeof(MeshCollider)) as MeshCollider;
+		//meshc.sharedMesh = go.GetComponent<Mesh>(); // Give it your mesh here.
+
+
+		//We need to fetch the Type
+		System.Type MyScriptType = System.Type.GetType ("TerrainGrid" + ",Assembly-CSharp");
+		//Now that we have the Type we can use it to Add Component
+		//go.AddComponent (MyScriptType);
 
 		return go;
 	}
 
 	void UpdateSize() {
 		int newSize = gridHeight * gridWidth;
+		print (_cells);
 		int oldSize = _cells.Length;
 
 		if (newSize == oldSize)
@@ -137,7 +170,6 @@ public class TerrainGrid : MonoBehaviour {
 		for (int z = 0; z < gridHeight + 1; z++) {
 			for (int x = 0; x < gridWidth + 1; x++) {
 				origin = new Vector3(x * cellSize + gridOrigin.x, 200, z * cellSize + gridOrigin.z);
-
 				Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Terrain"));
 				//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity);
 
