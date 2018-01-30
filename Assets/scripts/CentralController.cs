@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using UnityEngine; 
 
 public class CentralController : MonoBehaviour {
 
+	public Faction[] factions = new Faction[4];
 	// Use this for initialization
 	void Start () {
-		
+		factions[0] = new Faction();
+		factions[0].loadCharacters ();
 	}
 	
 	// Update is called once per frame
