@@ -5,6 +5,7 @@ using UnityEngine;
 public class Character : MonoBehaviour {
 	public string name;
 	public MBS.tbbPlayerInfo go;
+
 	public static Character create(string name){
 		Character ret;
 		ret = new Character();

@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Faction : MonoBehaviour {
-	public Character[] characters; // prefabs
+	//public Character[] characters; // prefabs
 
 
-	public void loadCharacters(){
-		characters = new Character[1]; //should be set by caller
-		characters[0] = Character.create("Ethan");
+	public void loadCharacters(Character[] characters){
+
 		//characters [0].transform.position = new Vector3 (10, 0, 5);
 		MBS.tbbPlayerInfo c = characters [0].go;
-		c.transform.position = new Vector3 (10, 0, 5);
+		c.transform.position = new Vector3 (5, 0, 0);
 		//c.anim.Play ("DamageFront");
 		print ("created character "+c.character_name);
 	}
