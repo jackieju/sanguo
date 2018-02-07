@@ -3,54 +3,58 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class InputHandler : MonoBehaviour {
+	private Vector3 origial_camera_pos;
+	private int start_drag = 0;
+	private Vector3 last_mouse_pos;
 
-	bool touching = false;
-	Vector2 lastPos;
-	Camera mCamera;
 
 	// Use this for initialization
 	void Start () {
-		mCamera = Camera.main;
-		print("touch handling");
+		//mCamera = Camera.main;
+
+		origial_camera_pos = transform.position;
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		print("update");
-
-		handleTouch();
+		handle_map_mover ();
 	}
 
-	void handleTouch(){
-		print ("handleTouch:"+Input.touchCount);
-		Touch t;
-		if(!touching && Input.touchCount >= 1) // pressed
-		{
-			print("touch down");
-			touching = true;
-			t = Input.GetTouch(0);
-			lastPos = t.position;
-			//        yourObject = Instantiate(someObjectPrefab, lastPos, Quaternion.Identity)
-			Vector3 tp_w1 = mCamera.ScreenToWorldPoint(t.position);
 
+	void handle_map_mover(){
+		if (Input.GetMouseButtonDown (0)) {
+			print ("mouse down");
+			print (Input.mousePosition);
+
+			RaycastHit hit = new RaycastHit ();
+			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+			if (Physics.Raycast (ray, out hit)) {
+				print (hit.collider.gameObject);
+				print (hit.transform.gameObject);
+			}
 		}
-		else if(touching && Input.touchCount >= 1) // finger down
-		{
-			t = Input.GetTouch(0);
-			lastPos = t.position;
-			//        yourObject.transform.Position = Camera.main.ViewportToWorldPoint(lastPos);
-			//trackTouch(t);
+		if (Input.GetMouseButton (0)) {
+			if (Input.mousePosition.x > 900 && Input.mousePosition.y > 400) {
+				print ("hello");				
+				if (start_drag == 0) {
+					start_drag = 1;
+					last_mouse_pos = Input.mousePosition;
+				} else {
+					Vector3 delta = Input.mousePosition - last_mouse_pos;
+					print ("dela:" + delta);
+					transform.position += new Vector3 (delta.x, 0, delta.y);
+					last_mouse_pos = Input.mousePosition;
+				}
+
+			} else {
+
+			}
 		}
-		else if(touching && Input.touchCount == 0) // released
-		{
-			//        Vector3 direction = Input.touches[0].position - lastPos;
-			//        yourObject.Rigidbody.velocity = direction.normalized*someSpeedValue;
-
-
-
-			touching = false;
-			print("touch released");
-
+		if (Input.GetMouseButtonUp (0)) {
+			print ("mouse up");
+			start_drag = 0;
+			transform.position = origial_camera_pos;
 		}
 	}
 }

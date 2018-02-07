@@ -3,65 +3,56 @@ using System.Collections.Generic;
 using UnityEngine; 
 
 public class CentralController : MonoBehaviour {
-	private Vector3 origial_camera_pos;
-	private int start_drag = 0;
-	private Vector3 last_mouse_pos;
 
-	public Faction[] factions = new Faction[4];
+	public int FACTION_NUMBER = 1;
+	public Faction[] factions;
+	public FactionSetting[] fs;
+
+	void Awake(){
+		fs = new FactionSetting[FACTION_NUMBER];
+		fs [0] = new FactionSetting ();
+		factions = new Faction[FACTION_NUMBER];
+
+		print ("fs" + fs.GetType().ToString());
+
+
+	}
 
 	// Use this for initialization
 	void Start () {
-		origial_camera_pos = transform.position;
-		for (int i = 0; i < factions.Length; i++) {
-			factions [0] = new Faction ();
+		// prepare testing data
 
-			// get characters
+
+		CharacterSetting _cs = new CharacterSetting("Ethan");
+		fs[0].add_character(_cs);
+		_cs = new CharacterSetting("RedSamurai");
+		fs[0].add_character(_cs);
+
+		// create factions object from factionsettings
+
+		for (int i = 0; i < fs.Length; i++) {
+			factions [i] = new Faction ();
+
+			CharacterSetting[] char_list = fs [i].get_character_list ();
+
+			// create characters
 			Character[] characters;
-			characters = new Character[1]; //should be set by caller
-			characters[0] = Character.create("Ethan");
-			characters[0] = Character.create("RedSamurai");
+			characters = new Character[char_list.Length]; 
+			/*characters[0] = Character.create("Ethan");
+			characters[0] = Character.create("RedSamurai");*/
+			for (int j = 0; j < char_list.Length; j++) {
+				CharacterSetting cs = char_list [j];
+				characters [j] = Character.create (cs);
 
-			factions [0].loadCharacters (characters);
+			}
+
+			factions [i].loadCharacters (characters);
 		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-		if (Input.GetMouseButtonDown (0)) {
-			print ("mouse down");
-			print (Input.mousePosition);
-			
-			RaycastHit hit = new RaycastHit();
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-			if (Physics.Raycast (ray, out hit)) {
-				print (hit.collider.gameObject);
-				print (hit.transform.gameObject);
-			}
-		}
-		if (Input.GetMouseButton (0)) {
-			if (Input.mousePosition.x > 900 && Input.mousePosition.y > 400){
-				print ("hello");				
-				if (start_drag == 0){
-					start_drag = 1;
-					last_mouse_pos = Input.mousePosition;
-				}
-				else {
-					Vector3 delta = Input.mousePosition - last_mouse_pos;
-					print("dela:"+delta);
-					transform.position += new Vector3(delta.x, 0, delta.y);
-					last_mouse_pos = Input.mousePosition;
-				}
 
-			}
-			else{
-				
-			}
-		}
-		if (Input.GetMouseButtonUp (0)) {
-			print ("mouse up");
-			start_drag = 0;
-			transform.position = origial_camera_pos;
-		}
 	}
 }
