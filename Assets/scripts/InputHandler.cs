@@ -18,22 +18,26 @@ public class InputHandler : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+		if (CentralController.inst.state == 100) {
+			if (Input.GetMouseButtonDown (0)) {
+				print ("mouse down");
+				print (Input.mousePosition);
+
+				RaycastHit hit = new RaycastHit ();
+				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+				if (Physics.Raycast (ray, out hit)) {
+					print (hit.collider.gameObject);
+					print (hit.transform.gameObject);
+				}
+			}
+		}
 		handle_map_mover ();
 	}
 
 
 	void handle_map_mover(){
-		if (Input.GetMouseButtonDown (0)) {
-			print ("mouse down");
-			print (Input.mousePosition);
 
-			RaycastHit hit = new RaycastHit ();
-			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-			if (Physics.Raycast (ray, out hit)) {
-				print (hit.collider.gameObject);
-				print (hit.transform.gameObject);
-			}
-		}
 		if (Input.GetMouseButton (0)) {
 			if (Input.mousePosition.x > 900 && Input.mousePosition.y > 400) {
 				print ("hello");				

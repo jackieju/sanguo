@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class TerrainGrid : MonoBehaviour {
+	public bool globalGrid = false;
+	public bool objectInGridCenter = true;
 	public Terrain terrain; //terrain grid is attached to
 	private Vector3 terrainOrigin;
-	public float cellSize = 1;
+	public float cellSize = 2;
 	public int gridWidth = 10;
 	public int gridHeight = 10;
-	public float yOffset = 0.5f;
+	public float yOffset = 0.3f;
 	public Material cellMaterialValid;
 	public Material cellMaterialInvalid;
 
@@ -16,6 +18,14 @@ public class TerrainGrid : MonoBehaviour {
 	private float[] _heights;
 	private Vector3 gridOrigin;
 
+	void Awake(){
+		if (terrain == null)
+			terrain = CentralController.inst.terrain;
+		if (cellMaterialValid == null)
+			cellMaterialValid = (Material)Resources.Load<Material> ("Materials/Fire Smoke");
+		if (cellMaterialInvalid == null)
+			cellMaterialInvalid = (Material)Resources.Load<Material> ("Materials/Bark");
+	}
 	void Start() {
 		print ("start grid");
 		terrainOrigin = terrain.transform.position;
@@ -23,8 +33,17 @@ public class TerrainGrid : MonoBehaviour {
 		// align current game object position to grid
 		alignPosition ();
 
-		gridOrigin = new Vector3(0-gridWidth*cellSize/2 - cellSize/2, 0, 0-gridHeight*cellSize/2 - cellSize/2);
+		print("transforM:"+transform.position);
+		if (objectInGridCenter)
+			gridOrigin = new Vector3 (0 - gridWidth * cellSize / 2 - cellSize / 2, 0, 0 - gridHeight * cellSize / 2 - cellSize / 2);
+		else
+			gridOrigin = new Vector3 (0- cellSize / 2, 0,0 - cellSize / 2);
 
+		if (globalGrid) {
+			Vector3 size = terrain.terrainData.size;
+			gridHeight = (int)(size.y / cellSize /10);
+			gridWidth = (int)(size.x / cellSize /10);
+		}
 
 		// create mesh for each grid
 		_cells = new GameObject[gridHeight * gridWidth];
@@ -65,14 +84,20 @@ public class TerrainGrid : MonoBehaviour {
 	}
 
 	void OnMouseDown(){
+		print ("Terrain grid clicked111");
 		if (Input.GetMouseButtonDown (0)) {
-			print ("ok");
+			print ("Terrain grid clicked:"+this.gameObject.name);
+
 		}
 
 	}
 
 	void alignPosition(){
-		Vector3 p= new Vector3(transform.position.z, transform.position.y, transform.position.x);
+		if (objectInGridCenter == false) {
+			transform.position = new Vector3 (cellSize / 2, 0, cellSize / 2);
+			return;
+		}
+		Vector3 p= new Vector3(transform.position.x, transform.position.y, transform.position.z);
 		float x1 = transform.position.x - terrainOrigin.x;
 		print ("x1=" + x1);
 		float m = x1 % cellSize;
@@ -105,12 +130,7 @@ public class TerrainGrid : MonoBehaviour {
 		//go.AddComponent<MeshCollider>();
 		//MeshCollider meshc = go.AddComponent(typeof(MeshCollider)) as MeshCollider;
 		//meshc.sharedMesh = go.GetComponent<Mesh>(); // Give it your mesh here.
-
-
-		//We need to fetch the Type
-		System.Type MyScriptType = System.Type.GetType ("TerrainGrid" + ",Assembly-CSharp");
-		//Now that we have the Type we can use it to Add Component
-		//go.AddComponent (MyScriptType);
+	
 
 		return go;
 	}
@@ -247,6 +267,7 @@ public class TerrainGrid : MonoBehaviour {
 			MeshVertex(x + 1, z),
 			MeshVertex(x + 1, z + 1),
 		};
+		mesh.RecalculateBounds ();
 	}
 
 	Vector3 MeshVertex(int x, int z) {

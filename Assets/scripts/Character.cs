@@ -33,6 +33,8 @@ public class Character : MonoBehaviour {
 		MapItem mi = go.gameObject.AddComponent<MapItem>();
 		//MapItem mi = go.gameObject.GetComponent<MapItem>;
 		mi.type = 1;
+		go.gameObject.AddComponent<BoxCollider> ();
+		go.gameObject.AddComponent<CharacterController> ();
 		return go;
 	}
 	// Use this for initialization

@@ -4,11 +4,18 @@ using UnityEngine;
 
 public class CentralController : MonoBehaviour {
 
+	public static CentralController inst;
 	public int FACTION_NUMBER = 1;
 	public Faction[] factions;
 	public FactionSetting[] fs;
 
+	public GameObject currentSelectedChar;
+	public Terrain terrain;
+	public int state;// 100: char selected
+
 	void Awake(){
+		inst = this;
+
 		fs = new FactionSetting[FACTION_NUMBER];
 		fs [0] = new FactionSetting ();
 		factions = new Faction[FACTION_NUMBER];
