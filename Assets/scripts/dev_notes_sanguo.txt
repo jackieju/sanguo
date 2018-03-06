@@ -1,0 +1,8 @@
+two ways to create global grid:
+1. use terraingrid and set global=true
+This will create mesh for the whole terrain by create mesh triangle for each grid
+
+2. use terrainboard.cs
+which will create mesh for the whole terrain using prefab
+the prefab is created by saving mesh runtime created in terraingrid.cs  
+http://blog.csdn.net/tom_221x/article/details/61920213 

@@ -5,6 +5,7 @@ using UnityEngine;
 public class CharacterSetting{
 	public string name;
 	public Dictionary<string, string> prop;
+	public bool clonable = false;
 	public CharacterSetting(string name){
 		this.name = name;
 	}
@@ -17,7 +18,12 @@ public class FactionSetting : MonoBehaviour {
 	public Dictionary<string, CharacterSetting> char_list= new Dictionary<string, CharacterSetting>();
 
 	public void add_character(CharacterSetting cs){
-		char_list [cs.name] = cs;
+		if (char_list.ContainsKey (cs.name)) {
+			if (cs.clonable)
+				char_list [cs.name + "_" + get_character_list ().Length] = cs;
+		}
+		else
+			char_list [cs.name] = cs;
 	}
 	public CharacterSetting[] get_character_list(){
 		return new List<CharacterSetting>(char_list.Values).ToArray();

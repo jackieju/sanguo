@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using UnityEditor;
+
 
 public class TerrainGrid : MonoBehaviour {
 	public bool globalGrid = false;
@@ -26,6 +30,16 @@ public class TerrainGrid : MonoBehaviour {
 		if (cellMaterialInvalid == null)
 			cellMaterialInvalid = (Material)Resources.Load<Material> ("Materials/Bark");
 	}
+
+	public void DestroyGrids(){
+		for (int z = 0; z < gridHeight; z++) {
+			for (int x = 0; x < gridWidth; x++) {
+				_cells [z * gridWidth + x].SetActive (false);
+				Destroy(_cells[z * gridWidth + x]);
+			}
+		}
+	}
+
 	void Start() {
 		print ("start grid");
 		terrainOrigin = terrain.transform.position;
@@ -41,8 +55,9 @@ public class TerrainGrid : MonoBehaviour {
 
 		if (globalGrid) {
 			Vector3 size = terrain.terrainData.size;
-			gridHeight = (int)(size.y / cellSize /10);
-			gridWidth = (int)(size.x / cellSize /10);
+			print ("terrain size:" + size);
+			gridHeight = (int)(size.z / cellSize);
+			gridWidth = (int)(size.x / cellSize );
 		}
 
 		// create mesh for each grid
@@ -66,6 +81,9 @@ public class TerrainGrid : MonoBehaviour {
 				GameObject cell = _cells[z * gridWidth + x];
 			
 				cell.AddComponent<MeshCollider>();
+				if (x == 0 && z == 0) {
+					//savegrid(cell, cell.GetComponent<MeshFilter>(), "./", "./");
+				}
 			}
 		}
 
@@ -86,7 +104,7 @@ public class TerrainGrid : MonoBehaviour {
 	void OnMouseDown(){
 		print ("Terrain grid clicked111");
 		if (Input.GetMouseButtonDown (0)) {
-			print ("Terrain grid clicked:"+this.gameObject.name);
+			print ("Terrain grid clicked:" + this.gameObject.name);
 
 		}
 
@@ -120,7 +138,7 @@ public class TerrainGrid : MonoBehaviour {
 	GameObject CreateChild() {
 		GameObject go = new GameObject();
 
-		go.name = "Grid Cell";
+		go.name = "GridCell";
 		go.transform.parent = transform;
 
 		go.transform.localPosition = gridOrigin;
@@ -195,7 +213,7 @@ public class TerrainGrid : MonoBehaviour {
 
 
 				_heights[z * (gridWidth + 1) + x] = hitInfo.point.y;
-				//print ("height:" + hitInfo.point.y);
+				print ("height:" + hitInfo.point.y);
 			}
 		}
 	}
@@ -267,13 +285,13 @@ public class TerrainGrid : MonoBehaviour {
 			MeshVertex(x + 1, z),
 			MeshVertex(x + 1, z + 1),
 		};
-		mesh.RecalculateBounds ();
+		mesh.RecalculateBounds (); // otherwise mesh will not be visible without in break mode
 	}
 
 	Vector3 MeshVertex(int x, int z) {
 		return new Vector3(x * cellSize, _heights[z * (gridWidth + 1) + x] + yOffset, z * cellSize);
 	}
-
+/*
 	public Vector3 GetWorldPosition(Vector3 gridPosition)
 	{
 		return new Vector3(terrainOrigin.z + (gridPosition.x * cellSize), terrainOrigin.y, terrainOrigin.x + (gridPosition.y * cellSize));
@@ -282,5 +300,117 @@ public class TerrainGrid : MonoBehaviour {
 	public Vector2 GetGridPosition(Vector3 worldPosition)
 	{
 		return new Vector2(worldPosition.z / cellSize, worldPosition.x / cellSize);
-	}
+	}*/
+
+
+	private string MeshToString(MeshFilter mf, Vector3 scale)  
+	{  
+	    Mesh          mesh            = mf.mesh;  
+	    Material[]    sharedMaterials = mf.GetComponent<Renderer>().sharedMaterials;  
+	    Vector2       textureOffset   = mf.GetComponent<Renderer>().material.GetTextureOffset("_MainTex");  
+	    Vector2       textureScale    = mf.GetComponent<Renderer>().material.GetTextureScale ("_MainTex");  
+	  
+	    StringBuilder stringBuilder   = new StringBuilder().Append("mtllib design.mtl")  
+	        .Append("\n")  
+	        .Append("g ")  
+	        .Append(mf.name)  
+	        .Append("\n");  
+	  
+	    Vector3[] vertices = mesh.vertices;  
+	    for (int i = 0; i < vertices.Length; i++)  
+	    {  
+	        Vector3 vector = vertices[i];  
+	        stringBuilder.Append(string.Format("v {0} {1} {2}\n", vector.x * scale.x, vector.y * scale.y, vector.z * scale.z));  
+	    }  
+	  
+	    stringBuilder.Append("\n");  
+	  
+	    Dictionary<int, int> dictionary = new Dictionary<int, int>();  
+	  
+	    if (mesh.subMeshCount > 1)  
+	    {  
+	        int[] triangles = mesh.GetTriangles(1);  
+	  
+	        for (int j = 0; j < triangles.Length; j += 3)  
+	        {  
+	            if (!dictionary.ContainsKey(triangles[j]))  
+	            {  
+	                dictionary.Add(triangles[j], 1);  
+	            }  
+	  
+	            if (!dictionary.ContainsKey(triangles[j + 1]))  
+	            {  
+	                dictionary.Add(triangles[j + 1], 1);  
+	            }  
+	  
+	            if (!dictionary.ContainsKey(triangles[j + 2]))  
+	            {  
+	                dictionary.Add(triangles[j + 2], 1);  
+	            }  
+	        }  
+	    }  
+	  
+	    for (int num = 0; num != mesh.uv.Length; num++)  
+	    {  
+	        Vector2 vector2 = Vector2.Scale(mesh.uv[num], textureScale) + textureOffset;  
+	  
+	        if (dictionary.ContainsKey(num))  
+	        {  
+	            stringBuilder.Append(string.Format("vt {0} {1}\n", mesh.uv[num].x, mesh.uv[num].y));  
+	        }  
+	        else  
+	        {  
+	            stringBuilder.Append(string.Format("vt {0} {1}\n", vector2.x, vector2.y));  
+	        }  
+	    }  
+	  
+	    for (int k = 0; k < mesh.subMeshCount; k++)  
+	    {  
+	        stringBuilder.Append("\n");  
+	  
+	        if (k == 0)  
+	        {  
+	            stringBuilder.Append("usemtl ").Append("Material_design").Append("\n");  
+	        }  
+	  
+	        if (k == 1)  
+	        {  
+	            stringBuilder.Append("usemtl ").Append("Material_logo").Append("\n");  
+	        }  
+	  
+	        int[] triangles2 = mesh.GetTriangles(k);  
+	  
+	        for (int l = 0; l < triangles2.Length; l += 3)  
+	        {  
+	            stringBuilder.Append(string.Format("f {0}/{0} {1}/{1} {2}/{2}\n", triangles2[l] + 1, triangles2[l + 2] + 1, triangles2[l + 1] + 1));  
+	        }  
+	    }  
+	  
+	    return stringBuilder.ToString();  
+	}  
+
+    // for creating prefab from runtime mesh
+	void savegrid(GameObject go, MeshFilter mf, string datPath, string projectPath){
+        //using (StreamWriter streamWriter = new StreamWriter(string.Format("{0}{1}.obj", datPath, "mesh1")))  
+		using (StreamWriter streamWriter = new StreamWriter("Assets/Resources/Prefabs/gridmesh.obj"))  
+		{  
+            streamWriter.Write(MeshToString(mf, new Vector3(-1f, 1f, 1f)));  
+            streamWriter.Close();  
+        }  
+        AssetDatabase.Refresh();
+        
+        // create prefab  
+		//Mesh mesh   = AssetDatabase.LoadAssetAtPath<Mesh>(string.Format("{0}{1}.obj", projectPath, "mesh1"));
+		//Mesh mesh   = AssetDatabase.LoadAssetAtPath<Mesh>("mesh1.obj");
+		Mesh mesh   = AssetDatabase.LoadAssetAtPath<Mesh>("Assets/Resources/Prefabs/gridmesh.obj");
+
+		print ("mesh:" + mesh);
+        mf.mesh     = mesh;  
+  
+		//PrefabUtility.CreatePrefab(string.Format("{0}{1}.prefab", projectPath, "mesh2"), go);  
+		PrefabUtility.CreatePrefab("Assets/Resources/Prefabs/bgrid2.prefab", go);  
+        AssetDatabase.Refresh();
+
+		print ("mesh saved");
+    }
 }

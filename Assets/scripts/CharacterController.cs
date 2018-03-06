@@ -15,20 +15,28 @@ public class CharacterController : MonoBehaviour {
 	}
 
 	void OnMouseDown(){
-		print ("i am selected");
-		hideTerrainGrid (CentralController.inst.currentSelectedChar);
+		print ("i am selected:"+this.gameObject.name);
+		if (CentralController.inst.currentSelectedChar) {
+			print ("last selectd:" + CentralController.inst.currentSelectedChar.name);
+			hideTerrainGrid (CentralController.inst.currentSelectedChar);
+		}
 		CentralController.inst.currentSelectedChar = this.gameObject;
 		showTerrainGrid (CentralController.inst.currentSelectedChar);
 		CentralController.inst.state = 100;
 	}
 
 	void hideTerrainGrid(GameObject go){
-		Destroy (gameObject.GetComponent<TerrainGrid> ());
+		print ("hide grids for :" + go.name);
+		TerrainGrid tg = go.GetComponent<TerrainGrid> ();
+		if (tg) {
+			tg.DestroyGrids ();
+			Destroy (tg);
+		}
 	}
 
 	void showTerrainGrid(GameObject go){
-		print ("showTerrainGrid:" + gameObject);
-		TerrainGrid tg = gameObject.AddComponent<TerrainGrid> ();
+		print ("showTerrainGrid:" + go);
+		TerrainGrid tg = go.AddComponent<TerrainGrid> ();
 		//tg.terrain = CentralController.inst.terrain;
 		//string path = "Materials/white";
 		//tg.cellMaterialInvalid = (Material)Resources.Load<Material> (path);
