@@ -26,6 +26,30 @@ public class Faction : MonoBehaviour {
 
 	}
 
+
+	public void deployCharacters(Character[] characters){
+		this.characters = characters;
+		//Vector3 tc = CentralController.inst.getTerrainCenterPoint ();
+		//print ("tc:" + tc);
+
+		// put the npc on to the terrain, maybe do this later in another step
+		Character c = characters [0];
+		c.transform.position = new Vector3 (20, 0, 10);
+		transformAsFaction (c.transform);
+
+		//c.PlayDieAnimation();
+		print ("created character "+c.name);
+
+		c = characters [1];
+		c.transform.position = new Vector3 (20, 0, 20);
+		transformAsFaction(c.transform);
+
+		//c.anim.Play ("DamageFront");
+
+
+		print ("created character "+c.name);
+	}
+	/*
 	public void loadCharacters(Character[] characters){
 		this.characters = characters;
 		//Vector3 tc = CentralController.inst.getTerrainCenterPoint ();
@@ -48,7 +72,7 @@ public class Faction : MonoBehaviour {
 
 		print ("created character "+c.character_name);
 	}
-
+*/
 	public void getCharacterList(){
 		
 	}

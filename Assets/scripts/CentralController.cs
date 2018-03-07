@@ -55,12 +55,26 @@ public class CentralController : MonoBehaviour {
 		fs[0].add_character(_cs);
 
 
-		_cs = new CharacterSetting("RedSamurai");
-		_cs.clonable = true;
-		fs[1].add_character(_cs);
-		fs[1].add_character(_cs);
+		if (FACTION_NUMBER > 1) {
+			_cs = new CharacterSetting ("RedSamurai");
+			_cs.clonable = true;
+			fs [1].add_character (_cs);
+			fs [1].add_character (_cs);
 
+			if (FACTION_NUMBER > 2) {
+				_cs = new CharacterSetting ("Ethan");
+				_cs.clonable = true;
+				fs [2].add_character (_cs);
+				fs [2].add_character (_cs);
 
+				if (FACTION_NUMBER > 3) {
+					_cs = new CharacterSetting ("RedSamurai");
+					_cs.clonable = true;
+					fs [3].add_character (_cs);
+					fs [3].add_character (_cs);
+				}
+			}
+		}
 		// create factions object according factionsettings
 
 		for (int i = 0; i < fs.Length; i++) {
@@ -83,11 +97,12 @@ public class CentralController : MonoBehaviour {
 		for (int j = 0; j < char_list.Length; j++) {
 			CharacterSetting cs = char_list [j];
 			print ("create ch " + j);
-			characters [j] = Character.create (cs);
+			//characters [j] = Character.create (cs);
+			characters [j] = Character.load (cs);
 
 		}
-
-		f.loadCharacters (characters);
+		f.deployCharacters (characters);
+		//f.loadCharacters (characters);
 	}
 	
 	// Update is called once per frame
