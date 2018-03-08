@@ -11,7 +11,7 @@ public class TerrainGrid : MonoBehaviour {
 	public bool objectInGridCenter = true;
 	public Terrain terrain; //terrain grid is attached to
 	private Vector3 terrainOrigin;
-	public float cellSize = 2;
+	private float cellSize = 1;
 	public int gridWidth = 10;
 	public int gridHeight = 10;
 	public float yOffset = 0.3f;
@@ -22,7 +22,34 @@ public class TerrainGrid : MonoBehaviour {
 	private float[] _heights;
 	private Vector3 gridOrigin;
 
+	public void inactiveAllCells(){
+		for (int z = 0; z < gridHeight; z++) {
+			for (int x = 0; x < gridWidth; x++) {
+				_cells [z * gridWidth + x].SetActive (false);
+			}
+		}
+	}
+	public void updateCell(int x, int y){
+		GameObject cell = _cells [y * gridWidth + x];
+		MeshRenderer meshRenderer = cell.GetComponent<MeshRenderer>();
+		MeshFilter meshFilter = cell.GetComponent<MeshFilter>();
+
+		meshRenderer.material = IsCellValid(x, y) ? cellMaterialValid : cellMaterialInvalid;
+		//UpdateMesh(meshFilter.mesh, x, z);
+
+	}
+	public void activeCell(int x, int y){
+		_cells [y * gridWidth + x].SetActive(true);
+		updateCell (x, y);
+
+	}
+
+	public GameObject[] getCells(){
+		return this._cells;
+	}
+
 	void Awake(){
+		cellSize = CentralController.gridCellSize;
 		if (terrain == null)
 			terrain = CentralController.inst.terrain;
 		if (cellMaterialValid == null)
@@ -41,6 +68,8 @@ public class TerrainGrid : MonoBehaviour {
 	}
 
 	void Start() {
+
+		CentralController.gridCellSize = this.cellSize;
 		print ("start grid");
 		terrainOrigin = terrain.transform.position;
 
@@ -98,6 +127,7 @@ public class TerrainGrid : MonoBehaviour {
 		UpdateSize();
 		//UpdatePosition();
 		UpdateHeights();
+
 		UpdateCells();
 	}
 
@@ -105,7 +135,16 @@ public class TerrainGrid : MonoBehaviour {
 		print ("Terrain grid clicked111");
 		if (Input.GetMouseButtonDown (0)) {
 			print ("Terrain grid clicked:" + this.gameObject.name);
+			CentralController cc = CentralController.inst;
+			/*if (cc.state == 100) { // move character onto this cell
+				RaycastHit hit;
+				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+				if (this.gameObject.GetComponent<Collider>().Raycast(ray, out hit, Mathf.Infinity)) {
+					Vector2 pos = cc.getPosFromCord(hit.point);
+					print ("click cell " + pos);
+				}
 
+			}*/
 		}
 
 	}

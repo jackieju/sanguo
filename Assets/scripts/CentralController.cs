@@ -13,6 +13,32 @@ public class CentralController : MonoBehaviour {
 	public Terrain terrain;
 	public int state;// 100: char selected
 	private Vector3 terrainCenterPoint;
+	public static float gridCellSize = 2;
+	private TerrainGrid _tg;
+
+	public TerrainGrid getGlobalTerainGrid(){
+		if (_tg != null)
+			return _tg;
+		else
+			_tg = GameObject.Find("GlobalTerainGrid").GetComponent<TerrainGrid>();
+		return _tg;
+	}
+	public GameObject[] getGrids(){
+		TerrainGrid gtg = getGlobalTerainGrid ();
+		return gtg.getCells();
+	}
+	public Vector3 getCordFromPos(Vector2 pos){
+		//Vector2 size = terrain.terrainData.size;
+		return new Vector3 (pos.x*gridCellSize + gridCellSize/2, 0, pos.y*gridCellSize+gridCellSize/2);
+	}
+	public Vector3 getCordFromPos(int x, int y){
+		//Vector2 size = terrain.terrainData.size;
+		return new Vector3 (x*gridCellSize + gridCellSize/2, 0, y*gridCellSize+gridCellSize/2);
+	}
+	public Vector2 getPosFromCord(Vector3 cord){
+		return new Vector2 ((int)(cord.x /gridCellSize), (int)(cord.z /gridCellSize));
+
+	}
 
 	public Vector3 getTerrainCenterPoint(){
 		print ("tc3:" + terrain.terrainData.size);
@@ -41,6 +67,7 @@ public class CentralController : MonoBehaviour {
 
 	}
 
+
 	// Use this for initialization
 	void Start () {
 		// prepare testing data
@@ -53,7 +80,28 @@ public class CentralController : MonoBehaviour {
 		fs[0].add_character(_cs);
 		_cs = new CharacterSetting("RedSamurai"); // create hero "redsamurai"
 		fs[0].add_character(_cs);
-
+		_cs.clonable = true;
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
+		fs[0].add_character(_cs);
 
 		if (FACTION_NUMBER > 1) {
 			_cs = new CharacterSetting ("RedSamurai");

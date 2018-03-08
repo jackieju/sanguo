@@ -20,6 +20,7 @@ public class Character : MonoBehaviour {
 	public CharacterSetting setting;
 
 
+	public int max_move_distance=5;
 	private  int hp;
 
 
@@ -211,6 +212,9 @@ public class Character : MonoBehaviour {
 		mi.type = 1;
 		go.gameObject.AddComponent<BoxCollider> ();
 		go.gameObject.AddComponent<CharacterController> ();
+		go.gameObject.layer = LayerMask.NameToLayer("Tree");
+		go.tag = "char";
+		go.gameObject.tag = "char";
 		return go;
 
 	}
@@ -293,7 +297,7 @@ public class Character : MonoBehaviour {
 		//得到真实NPC头顶的2D坐标
 		int padding =  30;
 		position = new Vector2 (position.x, Screen.height - position.y  - padding);
-		print ("gui position:" + position);
+		//print ("gui position:" + position);
 		//注解2
 		//计算出血条的宽高
 		Vector2 bloodSize = GUI.skin.label.CalcSize (new GUIContent(blood_red));
@@ -331,7 +335,7 @@ public class Character : MonoBehaviour {
 		bb.fontSize = 40;       //当然，这是字体颜色
 
 //		name= "魏延";
-		print ("nameSize:" + nameSize);
+		//print ("nameSize:" + nameSize);
 		//设置显示颜色为黄色
 		GUI.color  = Color.white;
 		//绘制NPC名称

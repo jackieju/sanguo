@@ -27,27 +27,48 @@ public class Faction : MonoBehaviour {
 	}
 
 
+
 	public void deployCharacters(Character[] characters){
+		CentralController cc = CentralController.inst;
+		Vector2 start_pos = new Vector2 (8, 8);
+		Vector2 cur_pos = start_pos;
+		int row_npc_number = 8;
+		int gap = 1; // distance between npc
+		cur_pos.x -= gap*row_npc_number/2;
+		cur_pos.y += gap*row_npc_number/2;
+
 		this.characters = characters;
 		//Vector3 tc = CentralController.inst.getTerrainCenterPoint ();
 		//print ("tc:" + tc);
 
 		// put the npc on to the terrain, maybe do this later in another step
-		Character c = characters [0];
-		c.transform.position = new Vector3 (20, 0, 10);
-		transformAsFaction (c.transform);
-
-		//c.PlayDieAnimation();
-		print ("created character "+c.name);
-
-		c = characters [1];
-		c.transform.position = new Vector3 (20, 0, 20);
-		transformAsFaction(c.transform);
-
-		//c.anim.Play ("DamageFront");
+		int j = 0;
+		for (int i = 0; i< characters.Length; i++){
 
 
-		print ("created character "+c.name);
+			Character c = characters [i];
+			c.transform.position = cc.getCordFromPos((int)cur_pos.x, (int)cur_pos.y);
+			print ("pos:" + c.transform.position);
+			transformAsFaction (c.transform);
+
+			//c.PlayDieAnimation();
+			print ("created character "+c.name);
+
+
+			//c.anim.Play ("DamageFront");
+			if (j >= row_npc_number) {
+				cur_pos.x -= (row_npc_number-1)*gap;
+				cur_pos.y += (row_npc_number+1)*gap;
+				j = 0;
+			} else {
+				cur_pos.x += gap;
+				cur_pos.y -= gap;
+				j += 1;
+			}
+
+		}
+
+
 	}
 	/*
 	public void loadCharacters(Character[] characters){
