@@ -33,7 +33,7 @@ public class Faction : MonoBehaviour {
 		Vector2 start_pos = new Vector2 (8, 8);
 		Vector2 cur_pos = start_pos;
 		int row_npc_number = 8;
-		int gap = 1; // distance between npc
+		int gap = 2; // distance between npc
 		cur_pos.x -= gap*row_npc_number/2;
 		cur_pos.y += gap*row_npc_number/2;
 

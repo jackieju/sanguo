@@ -47,7 +47,9 @@ public class TerrainGrid : MonoBehaviour {
 	public GameObject[] getCells(){
 		return this._cells;
 	}
-
+	public GameObject getCell(int x, int y){
+		return this._cells[y * gridWidth + x];
+	}
 	void Awake(){
 		cellSize = CentralController.gridCellSize;
 		if (terrain == null)
@@ -118,6 +120,8 @@ public class TerrainGrid : MonoBehaviour {
 
 
 		print ("start complete");
+
+		inactiveAllCells ();
 	}
 
 	void Update () {
@@ -219,6 +223,7 @@ public class TerrainGrid : MonoBehaviour {
 
 			for (int i = oldSize; i < newSize; i++) {
 				_cells[i] = CreateChild();
+				_cells [i].AddComponent<Cell> ();
 			}
 		}
 
@@ -274,14 +279,16 @@ public class TerrainGrid : MonoBehaviour {
 		return 	new Vector3(x * cellSize + gridOrigin.x+ cellSize/2, 200, z * cellSize + gridOrigin.z+ cellSize/2);
 
 	}
-	bool IsCellValid(int x, int z) {
+	public bool IsCellValid(int x, int z) {
 		RaycastHit hitInfo;
 		Vector3 origin = getGridCenterLocalPosition(x,z);
+		print ("grid cord:" + origin);
 		//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Buildings"));
-		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Tree"));
+		int layerMask =  (1 << LayerMask.NameToLayer("Tree")) | (1 << LayerMask.NameToLayer("Char"));
+		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, layerMask);
 		bool a = hitInfo.collider == null;
 		if (hitInfo.collider)
-			print("isvalid:"+hitInfo.collider.gameObject.name);
+			print("isvalid:("+x+","+z+"):"+hitInfo.collider.gameObject.name);
 		//if (hitInfo.collider == null || hitInfo.collider.gameObject.name == "Terrain")
 			//return true;
 

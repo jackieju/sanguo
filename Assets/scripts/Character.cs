@@ -20,9 +20,12 @@ public class Character : MonoBehaviour {
 	public CharacterSetting setting;
 
 
-	public int max_move_distance=5;
+	public int max_move_distance=2;
 	private  int hp;
 
+	public int getEffectMaxMoveDistance(){
+		return max_move_distance;
+	}
 
 
 	/// <summary>
@@ -212,7 +215,7 @@ public class Character : MonoBehaviour {
 		mi.type = 1;
 		go.gameObject.AddComponent<BoxCollider> ();
 		go.gameObject.AddComponent<CharacterController> ();
-		go.gameObject.layer = LayerMask.NameToLayer("Tree");
+		go.gameObject.layer = LayerMask.NameToLayer("Char");
 		go.tag = "char";
 		go.gameObject.tag = "char";
 		return go;
