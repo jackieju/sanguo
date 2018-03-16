@@ -312,7 +312,8 @@ public class Character : MonoBehaviour {
 		//int blood_width = blood_red.width * hp/setting.maxhp;
 		int blood_width = (int)(bloodSize.x * hp / setting.maxhp);
 
-
+		//GUI.depth = 10;
+			
 		//先绘制黑色血条
 		//GUI.DrawTexture(new Rect(position.x - (bloodSize.x/2),position.y - bloodSize.y ,bloodSize.x,bloodSize.y),blood_black);
 		GUI.DrawTexture(new Rect(position.x - (bloodSize.x/2) - 2, position.y - bloodSize.y -2, bloodSize.x+4, bloodSize.y+4),bloodslot);

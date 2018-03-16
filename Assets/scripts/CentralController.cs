@@ -16,6 +16,8 @@ public class CentralController : MonoBehaviour {
 	public static float gridCellSize = 2;
 	private TerrainGrid _tg;
 
+	public GameObject char_panel; // character attributes panel
+
 	public TerrainGrid getGlobalTerainGrid(){
 		if (_tg != null)
 			return _tg;

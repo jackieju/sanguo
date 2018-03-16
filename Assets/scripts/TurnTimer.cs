@@ -38,7 +38,7 @@ public class TurnTimer : MonoBehaviour {
 			times [current] += delta;
 			time = times [current];
 
-			print ("time:" + time);
+			//print ("time:" + time);
 			if (time > timeout) {
 				times [current] = 0;
 				timeup = true;

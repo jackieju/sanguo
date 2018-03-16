@@ -257,7 +257,7 @@ public class TerrainGrid : MonoBehaviour {
 
 
 				_heights[z * (gridWidth + 1) + x] = hitInfo.point.y;
-				print ("height:" + hitInfo.point.y);
+				//print ("height:" + hitInfo.point.y);
 			}
 		}
 	}
@@ -282,7 +282,7 @@ public class TerrainGrid : MonoBehaviour {
 	public bool IsCellValid(int x, int z) {
 		RaycastHit hitInfo;
 		Vector3 origin = getGridCenterLocalPosition(x,z);
-		print ("grid cord:" + origin);
+		//print ("grid cord:" + origin);
 		//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Buildings"));
 		int layerMask =  (1 << LayerMask.NameToLayer("Tree")) | (1 << LayerMask.NameToLayer("Char"));
 		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, layerMask);
