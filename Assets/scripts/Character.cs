@@ -21,8 +21,22 @@ public class Character : MonoBehaviour {
 
 
 	public int max_move_distance=2;
-	private  int hp;
+	public int attack;
+	public int knowledge;
+	public int hp;
+	public int maxhp;
+	public int mp;
+	public int maxmp;
+	private Faction faction;
 
+	public Faction getFaction ()
+	{
+		return faction;
+	}
+
+	public void setFaction(Faction f){
+		faction = f;
+	}
 	public int getEffectMaxMoveDistance(){
 		return max_move_distance;
 	}
@@ -109,22 +123,22 @@ public class Character : MonoBehaviour {
 	/// <summary>
 	/// Health points. Die when this reahes 0
 	/// </summary>
-	public int	HP;
+	//public int	HP;
 
 	/// <summary>
 	/// Magic points. Depleted when you cast a spell
 	/// </summary>
-	public int	MP;
+	//public int	MP;
 
 	/// <summary>
 	/// Max health this player can have
 	/// </summary>
-	public int	MaxHP;
+	//public int	MaxHP;
 
 	/// <summary>
 	/// Max magic points this player can have
 	/// </summary>
-	public int	MaxMP;
+	//public int	MaxMP;
 
 	/// <summary>
 	/// The player's level. In the basic damage system included with this kit, damage is multiplied by the player's level when attacking
@@ -194,16 +208,33 @@ public class Character : MonoBehaviour {
 		Character ret = Character.loadCharacterPrefab(cs.name);
 		ret.setting = cs;
 		ret.name = cs.name;
+		ret.max_move_distance = cs.movability;
+		ret.hp =  ret.maxhp = cs.maxhp;
+		ret.mp = ret.maxmp = cs.maxmp;
 		return ret;
 
 	}
 
 	public static Character loadCharacterPrefab(string name){
-		print ("====>ready to load "+name);
-		Character go = Instantiate (Resources.Load<Character>("Prefabs/Characters/"+name));
+		print ("====>ready to load "+name); 
+		Character go = Instantiate (Resources.Load<Character>("Prefabs/Characters/CharacterPrefabs/"+name));
+		//Character go = Resources.Load<Character>("Prefabs/Characters/"+name);
+
+		//GameObject go = Instantiate (Resources.Load<GameObject>("Prefabs/Characters/"+name));
+		//go.AddComponent<Character> ();
+
 		print ("g " + go.GetType().ToString());
 		print ("go " + go.name);
-		//	go.transform.position = new Vector3 (10, 10, 10);
+		//print ("go1" + go.gameObject.gameObject.GetInstanceID());
+		//print ("go11" + go.gameObject.gameObject.gameObject.GetInstanceID());
+		//print ("go11" + go.gameObject.GetInstanceID());
+
+		go.gameObject.name = name+go.gameObject.GetInstanceID();
+		print ("go2 " + GameObject.Find("Ethan(Clone)"));
+		/*GameObject g = GameObject.Find ("Ethan(Clone)");
+		if (g != null)
+			g.transform.localScale += new Vector3(9,9,9);*/
+		//go.transform.position = new Vector3 (10, 10, 10);
 
 		// attach script for mapitem
 		//We need to fetch the Type
@@ -218,7 +249,33 @@ public class Character : MonoBehaviour {
 		go.gameObject.layer = LayerMask.NameToLayer("Char");
 		go.tag = "char";
 		go.gameObject.tag = "char";
+
+		//		c.transform.GetChild(0).localScale += new Vector3 (5, 5, 5);
+
+		//		c.gameObject.transform.GetChild(0).localScale += new Vector3 (5, 5, 5);
+		/*foreach (Transform child in go.gameObject.transform) {
+			print("=======>child "+ child.gameObject);
+			child.transform.localScale += new Vector3(5, 2, 2);
+		}
+		foreach (Transform child in go.transform) {
+			print("=======>child "+ child.gameObject);
+			child.localScale += new Vector3(5, 2, 2);
+		}*/
+		//go.gameObject.gameObject.gameObject.transform.localScale += new Vector3 (5, 5, 5);
+
+		//go.gameObject.gameObject.transform.localScale += new Vector3 (5, 5, 5);
+		//		c.gameObject.GetComponent<GameObject>().transform.localScale += new Vector3 (5, 5, 5);
+		//		c.GetComponent<GameObject>().transform.localScale += new Vector3 (5, 5, 5);
+		//go.transform.localScale += new Vector3(2, 2, 2);
+		//go.gameObject.transform.localScale  += new Vector3(1, 1, 1);
+		//print("child count:"+go.gameObject.transform.childCount);
+		//print("child count:"+go.transform.childCount);
+		//go.transform.SetParent(CentralController.inst.terrain.transform);
+		go.gameObject.transform.localScale += new Vector3 (1, 1, 1);
+		//go.AddComponent<Character> ();
+		//return go.GetComponent<Character>();
 		return go;
+
 
 	}
 	void Awake(){
@@ -340,8 +397,10 @@ public class Character : MonoBehaviour {
 
 //		name= "魏延";
 		//print ("nameSize:" + nameSize);
-		//设置显示颜色为黄色
-		GUI.color  = Color.white;
+		//设置显示颜色
+
+		//print ("faction:" + faction);
+		GUI.color = faction.color;
 		//绘制NPC名称
 		GUI.Label(new Rect(10, 10 , nameSize.x, nameSize.y), "我方回合", bb);
 

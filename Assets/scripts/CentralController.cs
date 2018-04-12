@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CentralController : MonoBehaviour {
 
+	public GameObject pref1;
+	public bool gameworld_ready = false;
 	public static CentralController inst;
 	public int FACTION_NUMBER = 1;
 	public Faction[] factions;
@@ -13,10 +15,12 @@ public class CentralController : MonoBehaviour {
 	public Terrain terrain;
 	public int state;// 100: char selected
 	private Vector3 terrainCenterPoint;
-	public static float gridCellSize = 2;
-	private TerrainGrid _tg;
+	public static float gridCellSize = 4;
+	private TerrainGrid _tg; // do not access this variable directly, use getGlobalTerainGrid instead please
 
 	public GameObject char_panel; // character attributes panel
+
+	private Color[] colors = {Color.white, Color.red, Color.yellow, Color.blue};
 
 	public TerrainGrid getGlobalTerainGrid(){
 		if (_tg != null)
@@ -31,6 +35,7 @@ public class CentralController : MonoBehaviour {
 	}
 	public Vector3 getCordFromPos(Vector2 pos){
 		//Vector2 size = terrain.terrainData.size;
+		print("gridCellSize:"+gridCellSize);
 		return new Vector3 (pos.x*gridCellSize + gridCellSize/2, 0, pos.y*gridCellSize+gridCellSize/2);
 	}
 	public Vector3 getCordFromPos(int x, int y){
@@ -63,65 +68,85 @@ public class CentralController : MonoBehaviour {
 
 		}
 		factions = new Faction[FACTION_NUMBER];
+		//colors = new Color[FACTION_NUMBER];
 
 		print ("fs" + fs.GetType().ToString());
 
 
 	}
+	// !!! wrong, need rotate according to faction id
+	public int _move_char(Character c, Vector2 pos){
+
+		c.transform.position = getCordFromPos((int)pos.x, (int)pos.y);
 
 
-	// Use this for initialization
-	void Start () {
-		// prepare testing data
+		//print ("pos:" + pos);
+		//print ("cell:" + getGlobalTerainGrid ().getCell (pos));
+		Cell cell = getGlobalTerainGrid().getCell(pos).GetComponent<Cell>();
+		cell.character = c;
 
-		// create faction settings for testing
-		print ("fs size :" + FACTION_NUMBER);
-		// faction settings should be passed in runtime
-		// character setting is pre-designed in game and also contain data for user specific hero settings, e.g. position, experience, ming-wen addings
+		return 0;
+	}
+
+	FactionSetting loadFactionSettingFromUser(int userid){
+		int char_number = 36;
+		CharacterSetting[] cs = new CharacterSetting[2];
+		cs[0] = new CharacterSetting("Ethan");
+		cs [0].clonable = true;
+		cs [0].movability = 20;
+		cs [0].attack = 10;
+		cs [0].knowledge = 1;
+		cs [0].maxhp = 100;
+		cs [0].maxmp = 100;
+
+		cs[1] = new CharacterSetting("RedSamurai"); 
+		cs [1].clonable = true;
+		cs [1].movability = 10;
+		cs [1].attack = 10;
+		cs [1].knowledge = 10;
+		cs [1].maxhp = 60;
+		cs [1].maxmp = 60;
+
+		FactionSetting fs = new FactionSetting ();
+		fs.userid = userid;
+		for (int i = 0; i < char_number; i++) {
+			fs.add_character (cs[Random.Range(0, cs.Length)]);
+		}
+		return fs;
+	}
+
+
+	void loadTestData(){
 		CharacterSetting _cs = new CharacterSetting("Ethan"); // create hero named Ethan
 		fs[0].add_character(_cs);
 		_cs = new CharacterSetting("RedSamurai"); // create hero "redsamurai"
-		fs[0].add_character(_cs);
 		_cs.clonable = true;
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
-		fs[0].add_character(_cs);
+		for (int i = 0; i < 35; i++) {
+			fs [0].add_character (_cs);
+		}
 
+		int char_number = 36;
 		if (FACTION_NUMBER > 1) {
 			_cs = new CharacterSetting ("RedSamurai");
 			_cs.clonable = true;
-			fs [1].add_character (_cs);
-			fs [1].add_character (_cs);
+			for (int i = 0; i < char_number; i++) {
+				fs [1].add_character (_cs);
+			}
+
 
 			if (FACTION_NUMBER > 2) {
 				_cs = new CharacterSetting ("Ethan");
 				_cs.clonable = true;
-				fs [2].add_character (_cs);
-				fs [2].add_character (_cs);
+				for (int i = 0; i < char_number; i++) {
+					fs [2].add_character (_cs);
+				}
 
 				if (FACTION_NUMBER > 3) {
 					_cs = new CharacterSetting ("RedSamurai");
 					_cs.clonable = true;
-					fs [3].add_character (_cs);
-					fs [3].add_character (_cs);
+					for (int i = 0; i < char_number; i++) {
+						fs [3].add_character (_cs);
+					}
 				}
 			}
 		}
@@ -131,10 +156,71 @@ public class CentralController : MonoBehaviour {
 			Faction f  = new Faction (fs [i]);
 			f.factionID = i;
 			factions [i] = f;
+			factions [i].color = colors [i];
 			loadFactionCharacters (factions [i], fs [i]);
-		
+
 		}
 	}
+
+	IEnumerator prepareTestGame(){
+		
+		while (gameworld_ready == false) {
+			print ("wait1");
+
+			yield return new WaitForSeconds (1);
+			print ("wait2");
+
+		}
+
+		for (int  i=0;i<FACTION_NUMBER;i++){
+			fs[i] = loadFactionSettingFromUser (i);
+		}
+
+
+		// create factions object according factionsettings
+
+		for (int i = 0; i < fs.Length; i++) {
+			Faction f  = new Faction (fs [i]);
+			f.factionID = i;
+			factions [i] = f;
+			factions [i].color = colors [i];
+			loadFactionCharacters (factions [i], fs [i]);
+
+		}
+
+		print ("prepareTestData DONE!");
+	}
+	// Use this for initialization
+	void Start () {
+
+
+
+
+		// prepare testing data1
+
+		// create faction settings for testing
+		print ("fs size :" + FACTION_NUMBER);
+		// faction settings should be passed in runtime
+		// character setting is pre-designed in game and also contain data for user specific hero settings, e.g. position, experience, ming-wen addings
+		// Character setting should be store in database for each user
+
+		StartCoroutine (prepareTestGame());
+		//loadTestData();
+
+
+		// test Instantiate
+		/*Character c = Resources.Load<Character>("Prefabs/Characters/CharacterPrefabs/Ethan");
+		print ("====>ethan:" + c);
+		//c.gameObject.name = "bbbbbbb";
+		Character o1 = Instantiate (c, new Vector3(14, 0, 14), Quaternion.identity);
+		o1.name = "aaaaa2";
+		o1.transform.localScale = new Vector3 (4, 3, 3);
+
+		GameObject o = Instantiate (pref1, new Vector3(10, 0, 10), Quaternion.identity);
+		o.name = "aaaaa";
+		o.transform.localScale = new Vector3 (2, 2, 2);*/
+	}
+
 
 	protected void loadFactionCharacters( Faction f, FactionSetting fs) {
 		CharacterSetting[] char_list = fs.get_character_list ();
@@ -149,7 +235,7 @@ public class CentralController : MonoBehaviour {
 			print ("create ch " + j);
 			//characters [j] = Character.create (cs);
 			characters [j] = Character.load (cs);
-
+			characters [j].setFaction (f);
 		}
 		f.deployCharacters (characters);
 		//f.loadCharacters (characters);

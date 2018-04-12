@@ -8,7 +8,7 @@ public class Faction : MonoBehaviour {
 	public Vector3 pos = new Vector3(30,0,0);
 	public Vector3 rot = new Vector3(180,0,0);
 	public int factionID = 0; // 0 ~ 3, 0 is player himself
-
+	public Color color; // character name color
 	public Faction(FactionSetting fs){
 		this.fs = fs;
 	}
@@ -41,13 +41,15 @@ public class Faction : MonoBehaviour {
 		//Vector3 tc = CentralController.inst.getTerrainCenterPoint ();
 		//print ("tc:" + tc);
 
-		// put the npc on to the terrain, maybe do this later in another step
+		// put the npc on to the terrain
 		int j = 0;
 		for (int i = 0; i< characters.Length; i++){
 
 
 			Character c = characters [i];
-			c.transform.position = cc.getCordFromPos((int)cur_pos.x, (int)cur_pos.y);
+			c.setFaction(this);
+			CentralController.inst._move_char (c, cur_pos);
+			//c.transform.position = cc.getCordFromPos((int)cur_pos.x, (int)cur_pos.y);
 			print ("pos:" + c.transform.position);
 			transformAsFaction (c.transform);
 

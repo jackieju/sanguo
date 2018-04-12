@@ -338,7 +338,7 @@ namespace NJG
             {
                 if (mRoot == null) 
                 {
-                    if (transform.FindChild("MapContent") != null) mRoot = transform.FindChild("MapContent").GetComponent<RectTransform>(); 
+                    if (transform.Find("MapContent") != null) mRoot = transform.Find("MapContent").GetComponent<RectTransform>(); 
                 }
                 if (mRoot == null)
                 {
@@ -362,7 +362,7 @@ namespace NJG
 			{
                 if (mIconRoot == null)
                 {
-                    if (transform.FindChild("MapContent/Icons") != null) mIconRoot = transform.FindChild("MapContent/Icons").GetComponent<RectTransform>();
+                    if (transform.Find("MapContent/Icons") != null) mIconRoot = transform.Find("MapContent/Icons").GetComponent<RectTransform>();
                 }
                 if (mIconRoot == null)
 				{

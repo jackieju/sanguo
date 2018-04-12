@@ -3,17 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+#if UNITY_EDITOR 
 using UnityEditor;
-
+#endif
 
 public class TerrainGrid : MonoBehaviour {
 	public bool globalGrid = false;
 	public bool objectInGridCenter = true;
 	public Terrain terrain; //terrain grid is attached to
 	private Vector3 terrainOrigin;
-	private float cellSize = 1;
+	private float cellSize = 1; // controlled by CentralController.gridCellSize
+
+	// gridWidth and gridHight not used in global mode
 	public int gridWidth = 10;
 	public int gridHeight = 10;
+
 	public float yOffset = 0.3f;
 	public Material cellMaterialValid;
 	public Material cellMaterialInvalid;
@@ -39,6 +43,9 @@ public class TerrainGrid : MonoBehaviour {
 
 	}
 	public void activeCell(int x, int y){
+		//print ("active cell:" + x + "," + y);
+		if (x < 0 || x >= gridWidth || y < 0 || y >= gridHeight)
+			return;
 		_cells [y * gridWidth + x].SetActive(true);
 		updateCell (x, y);
 
@@ -49,6 +56,9 @@ public class TerrainGrid : MonoBehaviour {
 	}
 	public GameObject getCell(int x, int y){
 		return this._cells[y * gridWidth + x];
+	}
+	public GameObject getCell(Vector2 pos){
+		return this._cells[(int)pos.y * gridWidth + (int)pos.x];
 	}
 	void Awake(){
 		cellSize = CentralController.gridCellSize;
@@ -74,22 +84,31 @@ public class TerrainGrid : MonoBehaviour {
 		CentralController.gridCellSize = this.cellSize;
 		print ("start grid");
 		terrainOrigin = terrain.transform.position;
+		print("terrainOrigin:"+terrainOrigin);
 
 		// align current game object position to grid
-		alignPosition ();
+		if (!globalGrid)
+			alignPosition ();
 
 		print("transforM:"+transform.position);
+
+
 		if (objectInGridCenter)
 			gridOrigin = new Vector3 (0 - gridWidth * cellSize / 2 - cellSize / 2, 0, 0 - gridHeight * cellSize / 2 - cellSize / 2);
 		else
 			gridOrigin = new Vector3 (0- cellSize / 2, 0,0 - cellSize / 2);
+		
 
+		
 		if (globalGrid) {
 			Vector3 size = terrain.terrainData.size;
 			print ("terrain size:" + size);
 			gridHeight = (int)(size.z / cellSize);
 			gridWidth = (int)(size.x / cellSize );
+			gridOrigin = new Vector3 (0 - cellSize / 2, 0, 0 - cellSize / 2);
 		}
+		print ("gridWidth:" + gridWidth);
+		print ("gridHeight:" + gridHeight);
 
 		// create mesh for each grid
 		_cells = new GameObject[gridHeight * gridWidth];
@@ -102,7 +121,8 @@ public class TerrainGrid : MonoBehaviour {
 		}
 		print ("test update");
 		// adjust size and position according setting and parent(terrain)
-		UpdateSize();
+		if (!globalGrid)
+			UpdateSize();
 		//UpdatePosition();
 		UpdateHeights();
 		UpdateCells ();
@@ -122,6 +142,8 @@ public class TerrainGrid : MonoBehaviour {
 		print ("start complete");
 
 		inactiveAllCells ();
+
+		CentralController.inst.gameworld_ready = true;
 	}
 
 	void Update () {
@@ -184,7 +206,9 @@ public class TerrainGrid : MonoBehaviour {
 		go.name = "GridCell";
 		go.transform.parent = transform;
 
-		go.transform.localPosition = gridOrigin;
+		if (!globalGrid)
+			go.transform.localPosition = gridOrigin;
+
 		//go.transform.localPosition = Vector3.zero;
 		go.AddComponent<MeshRenderer>();
 		go.AddComponent<MeshFilter>().mesh = CreateMesh();
@@ -192,10 +216,11 @@ public class TerrainGrid : MonoBehaviour {
 		//MeshCollider meshc = go.AddComponent(typeof(MeshCollider)) as MeshCollider;
 		//meshc.sharedMesh = go.GetComponent<Mesh>(); // Give it your mesh here.
 	
-
+		go.AddComponent<Cell> ();
 		return go;
 	}
 
+	// not used in global mode
 	void UpdateSize() {
 		int newSize = gridHeight * gridWidth;
 		print (_cells);
@@ -223,7 +248,7 @@ public class TerrainGrid : MonoBehaviour {
 
 			for (int i = oldSize; i < newSize; i++) {
 				_cells[i] = CreateChild();
-				_cells [i].AddComponent<Cell> ();
+				//_cells [i].AddComponent<Cell> ();
 			}
 		}
 
@@ -252,6 +277,7 @@ public class TerrainGrid : MonoBehaviour {
 		for (int z = 0; z < gridHeight + 1; z++) {
 			for (int x = 0; x < gridWidth + 1; x++) {
 				origin = new Vector3(x * cellSize + gridOrigin.x, 200, z * cellSize + gridOrigin.z);
+				//origin = new Vector3(x * cellSize + cellSize/2 , 200, z * cellSize + cellSize/2);
 				Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Terrain"));
 				//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity);
 
@@ -276,15 +302,19 @@ public class TerrainGrid : MonoBehaviour {
 	}
 
 	Vector3 getGridCenterLocalPosition(int x, int z){
-		return 	new Vector3(x * cellSize + gridOrigin.x+ cellSize/2, 200, z * cellSize + gridOrigin.z+ cellSize/2);
+		// return 	new Vector3(x * cellSize + gridOrigin.x+ cellSize/2, 200, z * cellSize + gridOrigin.z+ cellSize/2);
+		return new Vector3(x * cellSize + cellSize/2, 200, z * cellSize + cellSize/2);
 
 	}
 	public bool IsCellValid(int x, int z) {
 		RaycastHit hitInfo;
 		Vector3 origin = getGridCenterLocalPosition(x,z);
-		//print ("grid cord:" + origin);
+		print ("cell Size:" + cellSize + ",gridOrigin:" + gridOrigin);
+		print ("grid1 cord:" + origin);
 		//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Buildings"));
 		int layerMask =  (1 << LayerMask.NameToLayer("Tree")) | (1 << LayerMask.NameToLayer("Char"));
+		print ("ray1 from:" + terrain.transform.TransformPoint(transform.TransformPoint(origin)));
+
 		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, layerMask);
 		bool a = hitInfo.collider == null;
 		if (hitInfo.collider)
@@ -435,6 +465,8 @@ public class TerrainGrid : MonoBehaviour {
 	    return stringBuilder.ToString();  
 	}  
 
+#if UNITY_EDITOR 
+
     // for creating prefab from runtime mesh
 	void savegrid(GameObject go, MeshFilter mf, string datPath, string projectPath){
         //using (StreamWriter streamWriter = new StreamWriter(string.Format("{0}{1}.obj", datPath, "mesh1")))  
@@ -459,4 +491,5 @@ public class TerrainGrid : MonoBehaviour {
 
 		print ("mesh saved");
     }
+#endif
 }
