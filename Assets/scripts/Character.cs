@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NJG;
+using UnityEngine.UI;
 
 
 public class Character : MonoBehaviour {
@@ -18,7 +19,8 @@ public class Character : MonoBehaviour {
 	public string name="xxxxx";
 	//public MBS.tbbPlayerInfo go; // gameobject
 	public CharacterSetting setting;
-
+	//private Canvas namebar;
+	private GameObject namebar;
 
 	public int max_move_distance=2;
 	public int attack;
@@ -218,6 +220,7 @@ public class Character : MonoBehaviour {
 	public static Character loadCharacterPrefab(string name){
 		print ("====>ready to load "+name); 
 		Character go = Instantiate (Resources.Load<Character>("Prefabs/Characters/CharacterPrefabs/"+name));
+        
 		//Character go = Resources.Load<Character>("Prefabs/Characters/"+name);
 
 		//GameObject go = Instantiate (Resources.Load<GameObject>("Prefabs/Characters/"+name));
@@ -249,6 +252,47 @@ public class Character : MonoBehaviour {
 		go.gameObject.layer = LayerMask.NameToLayer("Char");
 		go.tag = "char";
 		go.gameObject.tag = "char";
+
+		//
+		// add name bar
+		//
+		Canvas can = CentralController.inst.canvas;
+		GameObject newGO = new GameObject("myTextGO");
+		newGO.transform.SetParent(can.transform);
+		//Vector2 v2 = go.getHeadPositionInScreen (Camera.main);
+		//newGO.transform.position = new Vector3(v2.x, v2.y, 0);
+		Text text = newGO.AddComponent<Text>();
+		Font ArialFont = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+		text.font = ArialFont;
+		text.fontSize = 20;
+		text.material = ArialFont.material;
+		text.text = name;
+		go.namebar = newGO;
+
+		go.namebar.transform.localScale = new Vector3 (1, 1, 1);
+
+		// make sure it's render under panel
+		go.namebar.transform.SetSiblingIndex (0);
+
+
+
+		/*go.namebar = Instantiate(Resources.Load<Canvas>("Prefabs/CharName"));
+		print ("namebar " + go.namebar);
+
+		//Text nametext = go.namebar.GetComponent<Text>();
+		Text nametext = go.namebar.GetComponentInChildren<Text>();
+
+		print ("nametext " + nametext);
+
+		nametext.text = name; 
+		*/
+		//go.gameObject.AddComponent<Canvas> (go.namebar);
+		//namebar.position = new Vector3(player.position.x, player.position.y * SomeYOffset, player.position.z);
+		//namebar.transform.position = Camera.main.WorldToViewportPoint(go.transform.position) + new Vector3(0f, 0.05f, 0f); // Change the 0.05f value to some other value for desired height
+
+		//
+		// scale it
+		//
 
 		//		c.transform.GetChild(0).localScale += new Vector3 (5, 5, 5);
 
@@ -317,7 +361,7 @@ public class Character : MonoBehaviour {
 
 // Use this for initialization
 	void Start () {
-		if (null == model)
+		/*if (null == model)
 		{
 			Debug.LogError("No model specified for " + transform.name);
 			return;
@@ -328,7 +372,7 @@ public class Character : MonoBehaviour {
 		_model.parent = transform;
 		_model.localPosition = Vector3.zero;
 		_model.localRotation = Quaternion.identity;
-
+*/
 		hp = setting.maxhp/2;
 
 		//得到摄像机对象
@@ -345,24 +389,60 @@ public class Character : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		//Vector3 v3 = camera.WorldToViewportPoint(transform.position);
+		RectTransform canvas = CentralController.inst.canvas.GetComponent<RectTransform>();
+		Vector2 uiOffset = new Vector2((float)canvas.sizeDelta.x / 2f, (float)canvas.sizeDelta.y / 2f);
+
+		//Vector2 position = camera.WorldToScreenPoint (transform.position);
+		Vector2 ViewportPosition = Camera.main.WorldToViewportPoint(transform.position);
+		Vector2 proportionalPosition = new Vector2(ViewportPosition.x * canvas.sizeDelta.x, ViewportPosition.y * canvas.sizeDelta.y+ 100);
+		namebar.transform.localPosition = proportionalPosition - uiOffset;
+		//namebar.transform.localPosition = new Vector3 (position.x, position.y, 0);
+		//namebar.transform.localPosition = new Vector3 (v3.x, v3.y, 0);
+	/*	
+		//Vector3 worldPosition = new Vector3 (transform.position.x , transform.position.y + npcHeight ,transform.position.z);
+
+		//namebar.transform.position = Camera.main.WorldToViewportPoint(transform.position) + new Vector3(0f, 1.05f, 0f); // Change the 0.05f value to some other value for desired height
+		Text t = namebar.GetComponentInChildren<Text>();
+		TextGenerator textGen = new TextGenerator();
+		TextGenerationSettings generationSettings = t.GetGenerationSettings(t.rectTransform.rect.size); 
+		float width = textGen.GetPreferredWidth(t.text, generationSettings);
+		float height = textGen.GetPreferredHeight(t.text, generationSettings);
+		print ("width:" + width);
+		//namebar.transform.position = transform.position + new Vector3(0-width*namebar.transform.localScale.x/200, npcHeight+1.05f, 0); // Change the 0.05f value to some other value for desired height
+		//namebar.transform.position = transform.position + new Vector3(0, npcHeight+1.05f, 0); // Change the 0.05f value to some other value for desired height
+
+		Vector3 worldPosition = new Vector3 (transform.position.x , transform.position.y + npcHeight ,transform.position.z);
+		Vector2 position = camera.WorldToScreenPoint (worldPosition);
+		namebar.transform.position = worldPosition;
+		namebar.transform.rotation = Camera.main.transform.rotation;*/
 	}
-		
-	void OnGUI(){
+
+	Vector2 getHeadPositionInScreen(Camera camera){
 		//得到NPC头顶在3D世界中的坐标
 		//默认NPC坐标点在脚底下，所以这里加上npcHeight它模型的高度即可
 		Vector3 worldPosition = new Vector3 (transform.position.x , transform.position.y + npcHeight ,transform.position.z);
 		//根据NPC头顶的3D坐标换算成它在2D屏幕中的坐标
 		Vector2 position = camera.WorldToScreenPoint (worldPosition);
+		return position;
+	}
+	
+	void drawCharInfo(){
+		
+		Vector2 position = getHeadPositionInScreen (camera);
+
 		//得到真实NPC头顶的2D坐标
 		int padding =  30;
 		position = new Vector2 (position.x, Screen.height - position.y  - padding);
 		//print ("gui position:" + position);
+
+
+		//
+		// draw blood bar
+		//
 		//注解2
 		//计算出血条的宽高
 		Vector2 bloodSize = GUI.skin.label.CalcSize (new GUIContent(blood_red));
-
-
 		bloodSize.x = 100;
 		bloodSize.y = 10;
 		//通过血值计算红色血条显示区域
@@ -370,7 +450,7 @@ public class Character : MonoBehaviour {
 		int blood_width = (int)(bloodSize.x * hp / setting.maxhp);
 
 		//GUI.depth = 10;
-			
+		/*
 		//先绘制黑色血条
 		//GUI.DrawTexture(new Rect(position.x - (bloodSize.x/2),position.y - bloodSize.y ,bloodSize.x,bloodSize.y),blood_black);
 		GUI.DrawTexture(new Rect(position.x - (bloodSize.x/2) - 2, position.y - bloodSize.y -2, bloodSize.x+4, bloodSize.y+4),bloodslot);
@@ -378,12 +458,20 @@ public class Character : MonoBehaviour {
 		//在绘制红色血条
 		GUI.DrawTexture(new Rect(position.x - (bloodSize.x/2),position.y - bloodSize.y ,blood_width,bloodSize.y),blood_red);
 
+		*/
+
+		//
+		// draw text 
+		//
 
 		GUIStyle cc=new GUIStyle();
 		cc.normal.background = null;    //这是设置背景填充的
 		cc.normal.textColor=new Color(1,1,1);   //设置字体颜色的
 		cc.fontSize = 20;       //当然，这是字体颜色
 		GUI.skin.label.fontSize = 20;
+		//Font myFont = (Font)Resources.Load("Fonts/Arial", typeof(Font));
+		//cc.font = myFont;
+
 
 		//注解3
 		//计算NPC名称的宽高
@@ -394,8 +482,7 @@ public class Character : MonoBehaviour {
 		bb.normal.background = null;    //这是设置背景填充的
 		bb.normal.textColor=new Color(1,0,0);   //设置字体颜色的
 		bb.fontSize = 40;       //当然，这是字体颜色
-
-//		name= "魏延";
+		//		name= "魏延";
 		//print ("nameSize:" + nameSize);
 		//设置显示颜色
 
@@ -404,8 +491,9 @@ public class Character : MonoBehaviour {
 		//绘制NPC名称
 		GUI.Label(new Rect(10, 10 , nameSize.x, nameSize.y), "我方回合", bb);
 
-
-
 		GUI.Label(new Rect(position.x - (nameSize.x/2), position.y - nameSize.y - bloodSize.y  ,nameSize.x, nameSize.y), name, cc);
+	}
+	void OnGUI(){
+		//drawCharInfo ();
 	}
 }

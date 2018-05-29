@@ -21,6 +21,7 @@ public class TerrainGrid : MonoBehaviour {
 	public float yOffset = 0.3f;
 	public Material cellMaterialValid;
 	public Material cellMaterialInvalid;
+	public Material cellMaterialEnemy;
 
 	private GameObject[] _cells;
 	private float[] _heights;
@@ -38,8 +39,19 @@ public class TerrainGrid : MonoBehaviour {
 		MeshRenderer meshRenderer = cell.GetComponent<MeshRenderer>();
 		MeshFilter meshFilter = cell.GetComponent<MeshFilter>();
 
-		meshRenderer.material = IsCellValid(x, y) ? cellMaterialValid : cellMaterialInvalid;
-		//UpdateMesh(meshFilter.mesh, x, z);
+		int layerMask =  (1 << LayerMask.NameToLayer("Char"));
+		GameObject o = getObjectOnCell (x, y, layerMask);
+		Character enemy = null;
+		if (o) 
+			enemy = o.GetComponent<Character> ();
+		
+		if (enemy != null && enemy.getFaction ().factionID != 0) {
+			meshRenderer.material = cellMaterialEnemy;
+		} else {
+
+			meshRenderer.material = IsCellValid (x, y) ? cellMaterialValid : cellMaterialInvalid;
+		}
+			//UpdateMesh(meshFilter.mesh, x, z);
 
 	}
 	public void activeCell(int x, int y){
@@ -67,6 +79,8 @@ public class TerrainGrid : MonoBehaviour {
 		if (cellMaterialValid == null)
 			cellMaterialValid = (Material)Resources.Load<Material> ("Materials/Fire Smoke");
 		if (cellMaterialInvalid == null)
+			cellMaterialInvalid = (Material)Resources.Load<Material> ("Materials/Bark");
+		if (cellMaterialEnemy == null)
 			cellMaterialInvalid = (Material)Resources.Load<Material> ("Materials/Bark");
 	}
 
@@ -306,23 +320,32 @@ public class TerrainGrid : MonoBehaviour {
 		return new Vector3(x * cellSize + cellSize/2, 200, z * cellSize + cellSize/2);
 
 	}
-	public bool IsCellValid(int x, int z) {
+
+	public GameObject getObjectOnCell(int x, int z, int layerMask){
 		RaycastHit hitInfo;
 		Vector3 origin = getGridCenterLocalPosition(x,z);
-		print ("cell Size:" + cellSize + ",gridOrigin:" + gridOrigin);
-		print ("grid1 cord:" + origin);
+		//print ("cell Size:" + cellSize + ",gridOrigin:" + gridOrigin);
+		//print ("grid1 cord:" + origin);
 		//Physics.Raycast(transform.TransformPoint(origin), Vector3.down, out hitInfo, Mathf.Infinity, LayerMask.GetMask("Buildings"));
-		int layerMask =  (1 << LayerMask.NameToLayer("Tree")) | (1 << LayerMask.NameToLayer("Char"));
-		print ("ray1 from:" + terrain.transform.TransformPoint(transform.TransformPoint(origin)));
+		//int layerMask =  (1 << LayerMask.NameToLayer("Tree")) | (1 << LayerMask.NameToLayer("Char"));
+		//print ("ray1 from:" + terrain.transform.TransformPoint(transform.TransformPoint(origin)));
 
 		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, layerMask);
 		bool a = hitInfo.collider == null;
-		if (hitInfo.collider)
-			print("isvalid:("+x+","+z+"):"+hitInfo.collider.gameObject.name);
+		if (hitInfo.collider) {
+			print ("isvalid:(" + x + "," + z + "):" + hitInfo.collider.gameObject.name);
+			return hitInfo.collider.gameObject;
+		} else
+			return null;
+	}
+
+	public bool IsCellValid(int x, int z) {
+		int layerMask =  (1 << LayerMask.NameToLayer("Tree")) | (1 << LayerMask.NameToLayer("Char"));
+
 		//if (hitInfo.collider == null || hitInfo.collider.gameObject.name == "Terrain")
 			//return true;
-
-		return hitInfo.collider == null;
+		GameObject go = getObjectOnCell(x, z, layerMask);
+		return go == null;
 	}
 
 	Mesh CreateMesh() {

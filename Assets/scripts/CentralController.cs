@@ -12,7 +12,9 @@ public class CentralController : MonoBehaviour {
 	public FactionSetting[] fs;
 
 	public GameObject currentSelectedChar;
+	public Canvas canvas;
 	public Terrain terrain;
+	public Camera uiCamera;
 	public int state;// 100: char selected
 	private Vector3 terrainCenterPoint;
 	public static float gridCellSize = 4;
@@ -35,7 +37,7 @@ public class CentralController : MonoBehaviour {
 	}
 	public Vector3 getCordFromPos(Vector2 pos){
 		//Vector2 size = terrain.terrainData.size;
-		print("gridCellSize:"+gridCellSize);
+		//print("gridCellSize:"+gridCellSize);
 		return new Vector3 (pos.x*gridCellSize + gridCellSize/2, 0, pos.y*gridCellSize+gridCellSize/2);
 	}
 	public Vector3 getCordFromPos(int x, int y){

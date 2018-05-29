@@ -107,7 +107,7 @@ public class InputHandler : MonoBehaviour {
 							print ("kill_ret is " + kill_ret);
 
 							if (kill_ret == 1) {
-								Destroy (enemy.gameObject);
+								//Destroy (enemy.gameObject);
 								can_move = true;
 							}
 						} else {
@@ -166,7 +166,7 @@ public class InputHandler : MonoBehaviour {
 	}
 
 	int kill(Character c1, Character c2){
-		GameObject.Destroy (c2);
+		Destroy (c2.gameObject);
 		return 1;
 	}
 
@@ -219,7 +219,7 @@ public class InputHandler : MonoBehaviour {
 
 	}
 
-	Character check_enemy_on_pos(Vector2 pos){
+	/*Character check_enemy_on_pos(Vector2 pos){
 		TerrainGrid tg = CentralController.inst.getGlobalTerainGrid ();
 		Terrain terrain = CentralController.inst.terrain;
 		Vector3 origin = CentralController.inst.getCordFromPos (pos);
@@ -239,6 +239,24 @@ public class InputHandler : MonoBehaviour {
 
 				print ("find enemy:" + hitInfo.transform.gameObject);
 				return hitInfo.collider.gameObject.GetComponent<Character> ();
+			}
+		}
+		return null;
+
+	}*/
+
+
+	Character check_enemy_on_pos(Vector2 pos){
+		TerrainGrid tg = CentralController.inst.getGlobalTerainGrid ();
+		GameObject o  = tg.getObjectOnCell ((int)pos.x, (int)pos.y, LayerMask.GetMask("Char"));
+		if (o) {
+			print ("find enemy collider:" + o);
+			if (o.tag == "char") {
+
+				//print ("find enemy:" + hitInfo.transform.gameObject);
+				Character enemy = o.GetComponent<Character> ();
+				if (enemy != null && enemy.getFaction().factionID != 0) 
+					return enemy;
 			}
 		}
 		return null;
