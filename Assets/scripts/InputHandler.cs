@@ -166,7 +166,8 @@ public class InputHandler : MonoBehaviour {
 	}
 
 	int kill(Character c1, Character c2){
-		Destroy (c2.gameObject);
+		c2.destory ();
+		//Destroy (c2.gameObject);
 		return 1;
 	}
 

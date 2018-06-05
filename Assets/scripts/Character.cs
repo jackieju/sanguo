@@ -31,6 +31,10 @@ public class Character : MonoBehaviour {
 	public int maxmp;
 	private Faction faction;
 
+	public void destory(){
+		Destroy (namebar);
+		Destroy (this.gameObject);
+	}
 	public Faction getFaction ()
 	{
 		return faction;
@@ -207,7 +211,7 @@ public class Character : MonoBehaviour {
 
 	public static Character load(CharacterSetting cs){
 
-		Character ret = Character.loadCharacterPrefab(cs.name);
+		Character ret = Character.loadCharacterPrefab(cs);
 		ret.setting = cs;
 		ret.name = cs.name;
 		ret.max_move_distance = cs.movability;
@@ -217,9 +221,12 @@ public class Character : MonoBehaviour {
 
 	}
 
-	public static Character loadCharacterPrefab(string name){
+	public static Character loadCharacterPrefab(CharacterSetting cs){
+		string name = cs.name;
+		string prefab_name = cs.prefab_name;
+
 		print ("====>ready to load "+name); 
-		Character go = Instantiate (Resources.Load<Character>("Prefabs/Characters/CharacterPrefabs/"+name));
+		Character go = Instantiate (Resources.Load<Character>("Prefabs/Characters/CharacterPrefabs/"+prefab_name));
         
 		//Character go = Resources.Load<Character>("Prefabs/Characters/"+name);
 
@@ -267,6 +274,9 @@ public class Character : MonoBehaviour {
 		text.fontSize = 20;
 		text.material = ArialFont.material;
 		text.text = name;
+		text.alignment = TextAnchor.MiddleCenter;
+		RectTransform rt = newGO.GetComponent<RectTransform> ();
+		rt.sizeDelta =  new Vector2 (200, rt.sizeDelta.y);
 		go.namebar = newGO;
 
 		go.namebar.transform.localScale = new Vector3 (1, 1, 1);
@@ -394,8 +404,9 @@ public class Character : MonoBehaviour {
 		Vector2 uiOffset = new Vector2((float)canvas.sizeDelta.x / 2f, (float)canvas.sizeDelta.y / 2f);
 
 		//Vector2 position = camera.WorldToScreenPoint (transform.position);
-		Vector2 ViewportPosition = Camera.main.WorldToViewportPoint(transform.position);
-		Vector2 proportionalPosition = new Vector2(ViewportPosition.x * canvas.sizeDelta.x, ViewportPosition.y * canvas.sizeDelta.y+ 100);
+		Vector3 pos = new Vector3(transform.position.x, transform.position.y + npcHeight + 0.05f, transform.position.z);
+		Vector2 ViewportPosition = Camera.main.WorldToViewportPoint(pos);
+		Vector2 proportionalPosition = new Vector2(ViewportPosition.x * canvas.sizeDelta.x, ViewportPosition.y * canvas.sizeDelta.y );
 		namebar.transform.localPosition = proportionalPosition - uiOffset;
 		//namebar.transform.localPosition = new Vector3 (position.x, position.y, 0);
 		//namebar.transform.localPosition = new Vector3 (v3.x, v3.y, 0);

@@ -92,8 +92,19 @@ public class CentralController : MonoBehaviour {
 
 	FactionSetting loadFactionSettingFromUser(int userid){
 		int char_number = 36;
-		CharacterSetting[] cs = new CharacterSetting[2];
-		cs[0] = new CharacterSetting("Ethan");
+		CharacterSetting[] cs = new CharacterSetting[4];
+		cs[0] = new CharacterSetting("黄忠", "Ethan");
+		string name = "huangzhong";
+		//UnityEditor.MonoScript go = Instantiate (Resources.Load<UnityEditor.MonoScript>("NPC/" + name ));
+		CharacterSetting go = Instantiate (Resources.Load<CharacterSetting>("NPC/" + name ));
+
+		//string someString = "huangzhong";
+		//System.Type myType = someString.GetType();
+		//dynamic go = myType.GetConstructor (System.Type.EmptyTypes).Invoke (null);
+	
+
+		print("===>333"+ go.GetType());
+
 		cs [0].clonable = true;
 		cs [0].movability = 20;
 		cs [0].attack = 10;
@@ -108,6 +119,22 @@ public class CentralController : MonoBehaviour {
 		cs [1].knowledge = 10;
 		cs [1].maxhp = 60;
 		cs [1].maxmp = 60;
+
+		cs[2] = new CharacterSetting("Kyle"); 
+		cs [2].clonable = true;
+		cs [2].movability = 10;
+		cs [2].attack = 10;
+		cs [2].knowledge = 10;
+		cs [2].maxhp = 60;
+		cs [2].maxmp = 60;
+
+		cs[3] = new CharacterSetting("Troll"); 
+		cs [3].clonable = true;
+		cs [3].movability = 10;
+		cs [3].attack = 10;
+		cs [3].knowledge = 10;
+		cs [3].maxhp = 60;
+		cs [3].maxmp = 60;
 
 		FactionSetting fs = new FactionSetting ();
 		fs.userid = userid;
