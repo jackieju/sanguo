@@ -1,4 +1,7 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 public class MyClass
 {
@@ -7,6 +10,7 @@ public class MyClass
 	public int LogMyString ()
 	{
 		//Debug.Log (myString);
+		//print("--LogMyString--");
 		return 2 + 2;
 	}
 }

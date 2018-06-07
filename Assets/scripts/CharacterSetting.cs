@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CharacterSetting : MonoBehaviour{
+public class CharacterSetting : ScriptableObject{
 	public string name;
 	public string prefab_name;
 	public Dictionary<string, string> prop;
@@ -30,5 +30,8 @@ public class CharacterSetting : MonoBehaviour{
 	}
 	public void set(string name, string value){
 		prop [name] = value;
+	}
+	public virtual void  setup(){
+		Debug.Log ("===>call setup");
 	}
 }

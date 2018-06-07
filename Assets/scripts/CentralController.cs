@@ -91,19 +91,20 @@ public class CentralController : MonoBehaviour {
 	}
 
 	FactionSetting loadFactionSettingFromUser(int userid){
-		int char_number = 36;
-		CharacterSetting[] cs = new CharacterSetting[4];
-		cs[0] = new CharacterSetting("黄忠", "Ethan");
-		string name = "huangzhong";
+		//int char_number = 36;
+		//CharacterSetting[] cs = new CharacterSetting[4];
+		/*cs[0] = new CharacterSetting("黄忠", "Ethan");
+		string name = "Huangzhong";
 		//UnityEditor.MonoScript go = Instantiate (Resources.Load<UnityEditor.MonoScript>("NPC/" + name ));
-		CharacterSetting go = Instantiate (Resources.Load<CharacterSetting>("NPC/" + name ));
+		//CharacterSetting go = Instantiate (Resources.Load<CharacterSetting>("NPC/" + name ));
 
 		//string someString = "huangzhong";
 		//System.Type myType = someString.GetType();
 		//dynamic go = myType.GetConstructor (System.Type.EmptyTypes).Invoke (null);
-	
-
 		print("===>333"+ go.GetType());
+	*/
+
+		/*
 
 		cs [0].clonable = true;
 		cs [0].movability = 20;
@@ -140,7 +141,23 @@ public class CentralController : MonoBehaviour {
 		fs.userid = userid;
 		for (int i = 0; i < char_number; i++) {
 			fs.add_character (cs[Random.Range(0, cs.Length)]);
+		}*/
+
+		string[] chars = { "Huangzhong", "Zhaoyun", "Lvbu", "Caocao"};
+		FactionSetting fs = new FactionSetting ();
+		fs.userid = userid;
+		for (int i = 0; i < chars.Length; i++) {
+			System.Type type = System.Type.GetType(chars[i]);
+			CharacterSetting cs = (CharacterSetting)System.Activator.CreateInstance (type);
+			cs.setup ();
+			print("==cs.name:"+cs.GetType());
+			fs.add_character (cs);
 		}
+
+
+
+
+
 		return fs;
 	}
 

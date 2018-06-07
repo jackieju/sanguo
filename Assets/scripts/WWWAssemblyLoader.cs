@@ -63,18 +63,42 @@ public class WWWAssemblyLoader : MonoBehaviour
 		m_Complete = false;
 		m_ErrorString = "";
 		m_AssemblyURL = url;
-
-		//System.IO.File.ReadAllBytes (m_AssemblyURL);
 		string url1 = "file://"+Application.dataPath +"/"+ m_AssemblyURL;
 		print ("====>2222" + url1);
 		//print ("====>2222" + Application.dataPath);
 		//print ("====>22221" + Application.persistentDataPath);
+
+		/*
+
+
+		//System.IO.File.ReadAllBytes (m_AssemblyURL);
+
 		print ("====>22221" +Application.streamingAssetsPath);
 		//AssetData.
 		m_WWW = new WWW (m_AssemblyURL);
 		byte[] data = System.IO.File.ReadAllBytes (Application.dataPath + "/" + m_AssemblyURL);
+		*/
+
+		/*TextAsset asset = Resources.Load(m_AssemblyURL) as TextAsset;
+		byte[] data = asset.bytes;
+
+
 		Assembly assembly = Assembly.Load (data);
-		SendMessage ("OnAssemblyLoaded", new WWWAssembly (m_AssemblyURL, assembly));
+		System.Type type = assembly.GetType ("MyClass");*/
+
+		System.Type type = System.Type.GetType("MyClass");
+		object instance = System.Activator.CreateInstance (type);
+		print ("===>instance type:" + instance.GetType ());
+		MyClass instance1 = (MyClass)instance;
+		print("===>logmystring:"+instance1.LogMyString ());
+		/*ConstructorInfo constructor = type.GetConstructor(System.Type.EmptyTypes);
+		object instance = constructor.Invoke(null);
+		print ("===>instance type:" + instance.GetType ());
+		MyClass instance1 = (MyClass)instance;*/
+
+		//MyClass instance = (MyClass)(assembly.CreateInstance ("MyClass"));
+		//print("===>logmystring:"+instance.LogMyString ());
+		//SendMessage ("OnAssemblyLoaded", new WWWAssembly (m_AssemblyURL, assembly));
 
 	}
 
