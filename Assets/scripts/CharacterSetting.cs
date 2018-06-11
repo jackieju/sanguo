@@ -15,6 +15,13 @@ public class CharacterSetting : ScriptableObject{
 	public int maxhp = 100;
 	public int maxmp = 100;
 
+	public string[] kill;
+	public string[] bekilled;
+	public string desc;
+	public Dictionary<string, int> nations;// faction and his officer level
+
+	public string head_image="AvatarEthan";
+
 	public CharacterSetting()
 	{
 		
@@ -33,5 +40,20 @@ public class CharacterSetting : ScriptableObject{
 	}
 	public virtual void  setup(){
 		Debug.Log ("===>call setup");
+	}
+	public void after_setup(){
+		string s_kill = "";
+		if (kill != null) {
+			string[] ar_kill = new string[kill.Length];
+			//skill = string.Join (", ", kill);
+			for (int i = 0; i < kill.Length; i++) {
+				CharacterSetting cs = CentralController.load_charsetting (kill [i]);
+				cs.setup ();
+				Debug.Log ("==>kill:" + cs.name);
+				ar_kill [i] = cs.name;
+			}
+			s_kill = string.Join (" ", ar_kill);
+		}
+		desc = desc + "\n" + "克制:   " + s_kill;
 	}
 }

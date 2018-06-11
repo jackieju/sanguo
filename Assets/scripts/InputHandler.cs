@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class InputHandler : MonoBehaviour {
+
 	private Vector3 origial_camera_pos=Vector3.zero;
 	private int start_drag = 0; // start drag view on smal area
 	private Vector3 last_mouse_pos;
@@ -110,6 +112,7 @@ public class InputHandler : MonoBehaviour {
 								//Destroy (enemy.gameObject);
 								can_move = true;
 							}
+
 						} else {
 							int r = validatePos (me, (int)(pos.x), (int)(pos.y));
 							print ("validatePos is " + r);
@@ -166,7 +169,31 @@ public class InputHandler : MonoBehaviour {
 	}
 
 	int kill(Character c1, Character c2){
-		c2.destory ();
+		CharacterSetting cs1 = c1.setting;
+		CharacterSetting cs2 = c2.setting;
+	
+		print ("====>cs1:" + cs1.GetType ());
+		print ("====>cs2:" + cs2.GetType ());
+
+		//int ret = 1;
+		if (cs1.kill != null && Array.IndexOf (cs1.kill, c2.name)<0 ) {
+			c2.destory ();
+			return 1;
+		}
+
+		if (cs2.kill != null && Array.IndexOf (cs2.kill, c2.name) < 0 ) {
+			c1.destory ();
+			return -1;
+		}
+
+		if (cs1.attack >= cs2.attack) {
+			return 1;
+		} else {
+			return -1;
+		}
+
+
+
 		//Destroy (c2.gameObject);
 		return 1;
 	}
@@ -325,6 +352,7 @@ public class InputHandler : MonoBehaviour {
 					CentralController.inst.currentSelectedChar = hit.transform.gameObject;
 					showTerrainGrid (CentralController.inst.currentSelectedChar);
 					CentralController.inst.char_panel.SetActive(true);
+					CentralController.inst.updatePropertyPanel (CentralController.inst.currentSelectedChar.GetComponent<Character>());
 
 					cc.state = 100;
 					stop_propagate = true;
@@ -384,6 +412,8 @@ public class InputHandler : MonoBehaviour {
 			x += 1;
 		}
 	}
+
+
 
 	// 0: valid
 	// -1: cell not valid

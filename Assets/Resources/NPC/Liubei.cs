@@ -1,28 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class Huangzhong : CharacterSetting {
+
+public class Liubei : CharacterSetting {
 
 	public override void setup(){
 		Debug.Log ("===>call setup Huangzhong");
-		name = "黄忠";
+		name = "刘备";
 		desc = "";
-
 		clonable = true;
 		movability = 20;
 		attack = 10;
 		knowledge = 1;
 		maxhp = 100;
 		maxmp = 100;
-		prefab_name = "Ethan";
-		kill = new string[]{};
+		prefab_name = "Kyle";
+		kill = new string[]{"Lvbu"};
 		bekilled = new string[]{};
 		nations = new Dictionary<string, int> (){ 
-			{"Shu", 3}
+			{"Shu", 0}
 		};
 		head_image="Avatar"+prefab_name;
 
 	}
 
 
+
 }
+

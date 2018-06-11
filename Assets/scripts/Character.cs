@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 
 public class Character : MonoBehaviour {
+
+	/* for gui draw, not used now */
 	//主摄像机对象
 	private Camera camera;
 	//NPC模型高度
@@ -15,7 +17,10 @@ public class Character : MonoBehaviour {
 	//黑色血条贴图
 	//private Texture2D blood_black;
 	private Texture2D bloodslot;
+	/********             ********/
 
+
+	public Texture head_image;
 	public string name="xxxxx";
 	//public MBS.tbbPlayerInfo go; // gameobject
 	public CharacterSetting setting;
@@ -217,6 +222,9 @@ public class Character : MonoBehaviour {
 		ret.max_move_distance = cs.movability;
 		ret.hp =  ret.maxhp = cs.maxhp;
 		ret.mp = ret.maxmp = cs.maxmp;
+		print("===>texture:"+"Textures/avatars/"+cs.head_image);
+		ret.head_image = Resources.Load<Texture2D> ("Textures/avatars/"+cs.head_image);
+		//print ("===>head_image:" + ret.head_image.GetType());
 		return ret;
 
 	}
@@ -271,7 +279,7 @@ public class Character : MonoBehaviour {
 		Text text = newGO.AddComponent<Text>();
 		Font ArialFont = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
 		text.font = ArialFont;
-		text.fontSize = 20;
+		text.fontSize = 24;
 		text.material = ArialFont.material;
 		text.text = name;
 		text.alignment = TextAnchor.MiddleCenter;

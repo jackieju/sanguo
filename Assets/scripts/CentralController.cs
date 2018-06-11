@@ -1,8 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine; 
+using UnityEngine.UI;
 
 public class CentralController : MonoBehaviour {
+
+
+	// for update property panel 
+	public Text npc_name;
+	public Image npc_attack;
+	public Image npc_int;
+	public RawImage npc_image;
+	public Text npc_desc;
 
 	public GameObject pref1;
 	public bool gameworld_ready = false;
@@ -143,13 +152,13 @@ public class CentralController : MonoBehaviour {
 			fs.add_character (cs[Random.Range(0, cs.Length)]);
 		}*/
 
-		string[] chars = { "Huangzhong", "Zhaoyun", "Lvbu", "Caocao"};
+		string[] chars = { "Huangzhong", "Zhaoyun", "Lvbu", "Caocao", "Sunquan", "Liubei", "Zhugeliang"};
 		FactionSetting fs = new FactionSetting ();
 		fs.userid = userid;
 		for (int i = 0; i < chars.Length; i++) {
-			System.Type type = System.Type.GetType(chars[i]);
-			CharacterSetting cs = (CharacterSetting)System.Activator.CreateInstance (type);
+			CharacterSetting cs = CentralController.load_charsetting (chars [i]);
 			cs.setup ();
+			cs.after_setup ();
 			print("==cs.name:"+cs.GetType());
 			fs.add_character (cs);
 		}
@@ -161,6 +170,13 @@ public class CentralController : MonoBehaviour {
 		return fs;
 	}
 
+	public static CharacterSetting load_charsetting(string name)
+	{
+		System.Type type = System.Type.GetType(name);
+		CharacterSetting cs = (CharacterSetting)System.Activator.CreateInstance (type);
+
+		return cs;
+	}
 
 	void loadTestData(){
 		CharacterSetting _cs = new CharacterSetting("Ethan"); // create hero named Ethan
@@ -286,7 +302,18 @@ public class CentralController : MonoBehaviour {
 		f.deployCharacters (characters);
 		//f.loadCharacters (characters);
 	}
-	
+
+
+	public void updatePropertyPanel(Character ch){
+		CharacterSetting cs = ch.setting;
+		npc_int.fillAmount = cs.knowledge/ 100.0f;
+		npc_attack.fillAmount = cs.attack / 100.0f;
+		npc_name.text = ch.name;
+		npc_image.texture = ch.head_image;
+
+		npc_desc.text = cs.desc;
+	}
+
 	// Update is called once per frame
 	void Update () {
 
