@@ -14,7 +14,8 @@ public class Caocao : CharacterSetting {
 		knowledge = 1;
 		maxhp = 100;
 		maxmp = 100;
-		prefab_name = "Kyle";
+		//prefab_name = "Kyle";
+		prefab_name = "bubing";
 		kill = new string[]{"Lvbu", "Zhugeliang"};
 		bekilled = new string[]{};
 		nations = new Dictionary<string, int> (){ 

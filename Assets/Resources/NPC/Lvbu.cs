@@ -14,7 +14,7 @@ public class Lvbu : CharacterSetting {
 		maxhp = 100;
 		maxmp = 100;
 		prefab_name = "Troll";
-
+		//prefab_name = "nv";
 		//kill = new string[]{"Dongzhuo", "Dingyuan"};
 		nations = new Dictionary<string, int> (){ 
 			{"Lvbu", 0},

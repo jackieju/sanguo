@@ -18,7 +18,7 @@ public class CharacterSetting : ScriptableObject{
 	public string[] kill;
 	public string[] bekilled;
 	public string desc;
-	public Dictionary<string, int> nations;// faction and his officer level
+	public Dictionary<string, int> nations;// nation and his officer level
 
 	public string head_image="AvatarEthan";
 
@@ -43,6 +43,7 @@ public class CharacterSetting : ScriptableObject{
 	}
 	public void after_setup(){
 		string s_kill = "";
+		// prepare its kill and bekilled
 		if (kill != null) {
 			string[] ar_kill = new string[kill.Length];
 			//skill = string.Join (", ", kill);

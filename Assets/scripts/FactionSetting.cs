@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class FactionSetting : MonoBehaviour {
 	public int userid;
+	public int max_operation_number = 1;
+
 	//public List<string> character_names;
 	public Dictionary<string, CharacterSetting> char_list= new Dictionary<string, CharacterSetting>();
 

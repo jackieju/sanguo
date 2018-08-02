@@ -13,7 +13,9 @@ public class Zhaoyun : CharacterSetting {
 		knowledge = 1;
 		maxhp = 100;
 		maxmp = 100;
-		prefab_name = "RedSamurai";
+		//prefab_name = "RedSamurai";
+		prefab_name = "bubing";
+
 		nations = new Dictionary<string, int> (){ 
 			{"Shu", 3}
 		};

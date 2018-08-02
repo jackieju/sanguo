@@ -19,6 +19,7 @@ public class CentralController : MonoBehaviour {
 	public int FACTION_NUMBER = 1;
 	public Faction[] factions;
 	public FactionSetting[] fs;
+	public Faction player_faction;
 
 	public GameObject currentSelectedChar;
 	public Canvas canvas;
@@ -33,6 +34,10 @@ public class CentralController : MonoBehaviour {
 
 	private Color[] colors = {Color.white, Color.red, Color.yellow, Color.blue};
 
+	private bool camera_zoomed = false;
+
+	public int current_operating_faction = 0;
+
 	public TerrainGrid getGlobalTerainGrid(){
 		if (_tg != null)
 			return _tg;
@@ -44,16 +49,16 @@ public class CentralController : MonoBehaviour {
 		TerrainGrid gtg = getGlobalTerainGrid ();
 		return gtg.getCells();
 	}
-	public Vector3 getCordFromPos(Vector2 pos){
+	public static Vector3 getCordFromPos(Vector2 pos){
 		//Vector2 size = terrain.terrainData.size;
 		//print("gridCellSize:"+gridCellSize);
 		return new Vector3 (pos.x*gridCellSize + gridCellSize/2, 0, pos.y*gridCellSize+gridCellSize/2);
 	}
-	public Vector3 getCordFromPos(int x, int y){
+	public static Vector3 getCordFromPos(int x, int y){
 		//Vector2 size = terrain.terrainData.size;
 		return new Vector3 (x*gridCellSize + gridCellSize/2, 0, y*gridCellSize+gridCellSize/2);
 	}
-	public Vector2 getPosFromCord(Vector3 cord){
+	public static Vector2 getPosFromCord(Vector3 cord){
 		return new Vector2 ((int)(cord.x /gridCellSize), (int)(cord.z /gridCellSize));
 
 	}
@@ -85,11 +90,25 @@ public class CentralController : MonoBehaviour {
 
 
 	}
+
+	public void cmd_move_char(int faction, Character c, Vector2 pos){
+		_move_char (c, pos);
+		factions [faction].remaining_operation_number --;
+
+		if (factions [faction].remaining_operation_number == 0) {
+			gameObject.GetComponent<TurnTimer> ().setNext ();
+		}
+			
+	}
 	// !!! wrong, need rotate according to faction id
 	public int _move_char(Character c, Vector2 pos){
+		// move instantly
+		//c.transform.position = getCordFromPos((int)pos.x, (int)pos.y);
 
-		c.transform.position = getCordFromPos((int)pos.x, (int)pos.y);
+		// move with speed
+		StartCoroutine (MoveOverSeconds (c.gameObject, getCordFromPos((int)pos.x, (int)pos.y), 1f));
 
+		//c.UpdateMesh((int)pos.x, (int)pos.y);
 
 		//print ("pos:" + pos);
 		//print ("cell:" + getGlobalTerainGrid ().getCell (pos));
@@ -98,7 +117,32 @@ public class CentralController : MonoBehaviour {
 
 		return 0;
 	}
+	public IEnumerator MoveOverSpeed (GameObject objectToMove, Vector3 end, float speed){
+		// speed should be 1 unit per second
+		while (objectToMove.transform.position != end)
+		{
+			objectToMove.transform.position = Vector3.MoveTowards(objectToMove.transform.position, end, speed * Time.deltaTime);
+			yield return new WaitForEndOfFrame ();
+		}
+	}
 
+	public IEnumerator MoveOverSeconds (GameObject objectToMove, Vector3 end, float seconds)
+	{
+		float elapsedTime = 0;
+		Vector3 startingPos = objectToMove.transform.position;
+		while (elapsedTime < seconds)
+		{
+			objectToMove.transform.position = Vector3.Lerp(startingPos, end, (elapsedTime / seconds));
+			elapsedTime += Time.deltaTime;
+			yield return new WaitForEndOfFrame();
+		}
+		objectToMove.transform.position = end;
+	}
+
+
+	//
+	// main entry for test
+	//
 	FactionSetting loadFactionSettingFromUser(int userid){
 		//int char_number = 36;
 		//CharacterSetting[] cs = new CharacterSetting[4];
@@ -170,6 +214,7 @@ public class CentralController : MonoBehaviour {
 		return fs;
 	}
 
+	// load character setting by character name: e.g. 'Huangzhong'
 	public static CharacterSetting load_charsetting(string name)
 	{
 		System.Type type = System.Type.GetType(name);
@@ -234,10 +279,12 @@ public class CentralController : MonoBehaviour {
 
 		}
 
+		//
+		// main entry here
+		//
 		for (int  i=0;i<FACTION_NUMBER;i++){
 			fs[i] = loadFactionSettingFromUser (i);
 		}
-
 
 		// create factions object according factionsettings
 
@@ -249,7 +296,7 @@ public class CentralController : MonoBehaviour {
 			loadFactionCharacters (factions [i], fs [i]);
 
 		}
-
+		player_faction = factions [0];
 		print ("prepareTestData DONE!");
 	}
 	// Use this for initialization
@@ -283,7 +330,7 @@ public class CentralController : MonoBehaviour {
 		o.transform.localScale = new Vector3 (2, 2, 2);*/
 	}
 
-
+	// load and deply gameobject from faction setting
 	protected void loadFactionCharacters( Faction f, FactionSetting fs) {
 		CharacterSetting[] char_list = fs.get_character_list ();
 		print ("char_list size:" + char_list.Length);
@@ -312,6 +359,18 @@ public class CentralController : MonoBehaviour {
 		npc_image.texture = ch.head_image;
 
 		npc_desc.text = cs.desc;
+	}
+
+	public void toggleZoom(){
+		Vector3 delta2 = new Vector3 (0, 60, 0);
+		if (!camera_zoomed) {
+			transform.position += delta2;
+			camera_zoomed = true;
+		} else {
+			transform.position -= delta2;
+			camera_zoomed = false;
+		}
+		
 	}
 
 	// Update is called once per frame

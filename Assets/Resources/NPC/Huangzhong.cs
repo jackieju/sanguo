@@ -14,7 +14,8 @@ public class Huangzhong : CharacterSetting {
 		knowledge = 1;
 		maxhp = 100;
 		maxmp = 100;
-		prefab_name = "Ethan";
+		//prefab_name = "Ethan";
+		prefab_name = "z1";
 		kill = new string[]{};
 		bekilled = new string[]{};
 		nations = new Dictionary<string, int> (){ 

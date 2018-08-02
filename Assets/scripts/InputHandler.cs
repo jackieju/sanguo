@@ -77,8 +77,10 @@ public class InputHandler : MonoBehaviour {
 		if (Input.GetMouseButtonDown (0))
 			pos_on_button_down = Input.mousePosition;
 		
-		if (!moving && 0 == moving_view) { // not in moving
-			if (CentralController.inst.state == 100) { // character selected
+		if (!moving && 0 == moving_view) { // not in moving view
+			if (CentralController.inst.current_operating_faction == 0 
+				&& CentralController.inst.factions[0].remaining_operation_number > 0
+				&& CentralController.inst.state == 100) { // character selected
 				print ("mouse up222");
 				if (Input.GetMouseButtonUp (0)) {
 					CentralController cc = CentralController.inst;
@@ -93,7 +95,7 @@ public class InputHandler : MonoBehaviour {
 				}*/
 
 					if (cc.terrain.GetComponent<Collider> ().Raycast (ray, out hit, Mathf.Infinity)) {
-						Vector2 pos = cc.getPosFromCord (hit.point);
+						Vector2 pos = CentralController.getPosFromCord (hit.point);
 						print ("click cell " + pos);
 
 						//
@@ -131,7 +133,7 @@ public class InputHandler : MonoBehaviour {
 						}
 						if (can_move) {
 							print ("ok move hero");
-							cc._move_char (cc.currentSelectedChar.GetComponent<Character> (), pos);
+							cc.cmd_move_char (0, cc.currentSelectedChar.GetComponent<Character> (), pos);
 							//cc.currentSelectedChar.transform.position = cc.getCordFromPos (pos);
 							cc.state = 0;
 							print ("hero moved");
@@ -386,7 +388,7 @@ public class InputHandler : MonoBehaviour {
 		CentralController cc = CentralController.inst;
 		TerrainGrid tg = cc.getGlobalTerainGrid ();
 		tg.inactiveAllCells ();
-		Vector2 pos = cc.getPosFromCord (go.transform.position);
+		Vector2 pos = CentralController.getPosFromCord (go.transform.position);
 		print ("ch pos:" + pos);
 		Character hero = go.GetComponent<Character> ();
 		int range = hero.getEffectMaxMoveDistance();
@@ -424,7 +426,7 @@ public class InputHandler : MonoBehaviour {
 		TerrainGrid tg = cc.getGlobalTerainGrid ();
 
 		// check if it out of range
-		Vector2 pos = cc.getPosFromCord (hero.gameObject.transform.position);
+		Vector2 pos = CentralController.getPosFromCord (hero.gameObject.transform.position);
 		int dist_x = (int)pos.x - x;
 		int dist_y = (int)pos.y - y;
 		//print ("dist:" + dist_x + "," + dist_y);
@@ -455,10 +457,10 @@ public class InputHandler : MonoBehaviour {
 			Vector3 dis = Input.mousePosition - pos_on_button_down;
 			//print ("dis:" + dis);
 			if (holding_time > movable_time || dis.x > 10 || dis.y> 10 || dis.x < -10 || dis.y < -10) {
-				if (moving_view == 0 && Input.mousePosition.x > 900 && Input.mousePosition.y > 400) {
+				if (moving_view == 0 && Input.mousePosition.x > Screen.width*4/5 && Input.mousePosition.y > Screen.height*4/5) {
 					// fast move view in particular screen area
 					if (start_drag == 0 && last_mouse_pos == Vector3.zero) {
-						print ("hello");
+						//print ("hello");
 						start_drag = 1;
 						last_mouse_pos = Input.mousePosition;
 					} else {

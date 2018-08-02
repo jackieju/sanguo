@@ -333,7 +333,7 @@ public class TerrainGrid : MonoBehaviour {
 		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, layerMask);
 		bool a = hitInfo.collider == null;
 		if (hitInfo.collider) {
-			print ("isvalid:(" + x + "," + z + "):" + hitInfo.collider.gameObject.name);
+			//print ("isvalid:(" + x + "," + z + "):" + hitInfo.collider.gameObject.name);
 			return hitInfo.collider.gameObject;
 		} else
 			return null;

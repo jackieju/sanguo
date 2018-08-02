@@ -26,6 +26,8 @@ public class Character : MonoBehaviour {
 	public CharacterSetting setting;
 	//private Canvas namebar;
 	private GameObject namebar;
+	public Material goMaterial;
+	public float cellSize=1;
 
 	public int max_move_distance=2;
 	public int attack;
@@ -34,7 +36,9 @@ public class Character : MonoBehaviour {
 	public int maxhp;
 	public int mp;
 	public int maxmp;
-	private Faction faction;
+	public Faction faction;
+
+
 
 	public void destory(){
 		Destroy (namebar);
@@ -47,6 +51,7 @@ public class Character : MonoBehaviour {
 
 	public void setFaction(Faction f){
 		faction = f;
+		namebar.GetComponent<Text> ().color = faction.color;
 	}
 	public int getEffectMaxMoveDistance(){
 		return max_move_distance;
@@ -229,13 +234,74 @@ public class Character : MonoBehaviour {
 
 	}
 
-	public static Character loadCharacterPrefab(CharacterSetting cs){
-		string name = cs.name;
-		string prefab_name = cs.prefab_name;
+	/** function used for loading 2d mesh character **/
+	//
+	public  Vector3 MeshVertex(int x, int z) {
+		return new Vector3(x * cellSize, 2, z * cellSize);
+	}
 
-		print ("====>ready to load "+name); 
+	public void UpdateMesh(int x, int z) {
+		Mesh mesh = this.gameObject.GetComponent<MeshFilter> ().mesh;
+		mesh.vertices = new Vector3[] {
+			MeshVertex(x, z),
+			MeshVertex(x, z + 1),
+			MeshVertex(x + 1, z),
+			MeshVertex(x + 1, z + 1),
+		};
+		mesh.RecalculateBounds (); // otherwise mesh will not be visible without in break mode
+	}
+
+
+	public static Character createGridCharGO(){
+		GameObject go = new GameObject();
+
+		go.AddComponent<Character> ();
+		Character char1 = go.GetComponent<Character> ();
+		char1.cellSize = CentralController.gridCellSize;
+
+		Material goMaterial = (Material)Resources.Load<Material> ("Materials/char");
+
+		go.name = "chargo";
+		//go.transform.parent = CentralController.inst.getGlobalTerainGrid().transform;
+
+	//	if (!globalGrid)
+		//	go.transform.localPosition = gridOrigin;
+
+		//go.transform.localPosition = Vector3.zero;
+		go.AddComponent<MeshRenderer>();
+		Mesh mesh = new Mesh();
+
+		mesh.vertices = new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero };
+		mesh.triangles = new int[] { 0, 1, 2, 2, 1, 3 };
+		mesh.normals = new Vector3[] { Vector3.up, Vector3.up, Vector3.up, Vector3.up };
+		mesh.uv = new Vector2[] { new Vector2(1, 1), new Vector2(1, 0), new Vector2(0, 1), new Vector2(0, 0) };
+		go.AddComponent<MeshFilter> ().mesh = mesh;
+		char1.UpdateMesh (0, 0);
+		go.AddComponent<MeshCollider>();
+
+		MeshRenderer meshRenderer = go.GetComponent<MeshRenderer>();
+
+		meshRenderer.material = goMaterial;
+
+
+
+
+
+
+		return char1;
+
+	}
+	//
+	/*****       end             ****/
+
+
+
+	// create 3d Character Object from prefab
+	public static Character createGO(string name, string prefab_name){
+
+		print("load prefab Prefabs/Characters/CharacterPrefabs/"+prefab_name);
 		Character go = Instantiate (Resources.Load<Character>("Prefabs/Characters/CharacterPrefabs/"+prefab_name));
-        
+
 		//Character go = Resources.Load<Character>("Prefabs/Characters/"+name);
 
 		//GameObject go = Instantiate (Resources.Load<GameObject>("Prefabs/Characters/"+name));
@@ -262,51 +328,32 @@ public class Character : MonoBehaviour {
 		MapItem mi = go.gameObject.AddComponent<MapItem>();
 		//MapItem mi = go.gameObject.GetComponent<MapItem>;
 		mi.type = 1;
-		go.gameObject.AddComponent<BoxCollider> ();
+
+	
+		BoxCollider boxCol = go.gameObject.GetComponent<BoxCollider> ();
+		if (boxCol == null)
+			boxCol = go.gameObject.AddComponent<BoxCollider> ();
+		/*Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+		Renderer thisRenderer = go.GetComponent<Renderer>();
+		bounds.Encapsulate(thisRenderer.bounds);
+		//boxCol.offset = bounds.center - transform.position;
+		boxCol.size = bounds.size;*/
+		/*Bounds newbound = go.gameObject.GetComponent<MeshFilter>().mesh.bounds;
+		boxCol.bounds.Encapsulate (newbound);
+		boxCol.size = newbound.size;
+		*/
+
+
+
+
+
+
+
 		go.gameObject.AddComponent<CharacterController> ();
 		go.gameObject.layer = LayerMask.NameToLayer("Char");
 		go.tag = "char";
 		go.gameObject.tag = "char";
 
-		//
-		// add name bar
-		//
-		Canvas can = CentralController.inst.canvas;
-		GameObject newGO = new GameObject("myTextGO");
-		newGO.transform.SetParent(can.transform);
-		//Vector2 v2 = go.getHeadPositionInScreen (Camera.main);
-		//newGO.transform.position = new Vector3(v2.x, v2.y, 0);
-		Text text = newGO.AddComponent<Text>();
-		Font ArialFont = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
-		text.font = ArialFont;
-		text.fontSize = 24;
-		text.material = ArialFont.material;
-		text.text = name;
-		text.alignment = TextAnchor.MiddleCenter;
-		RectTransform rt = newGO.GetComponent<RectTransform> ();
-		rt.sizeDelta =  new Vector2 (200, rt.sizeDelta.y);
-		go.namebar = newGO;
-
-		go.namebar.transform.localScale = new Vector3 (1, 1, 1);
-
-		// make sure it's render under panel
-		go.namebar.transform.SetSiblingIndex (0);
-
-
-
-		/*go.namebar = Instantiate(Resources.Load<Canvas>("Prefabs/CharName"));
-		print ("namebar " + go.namebar);
-
-		//Text nametext = go.namebar.GetComponent<Text>();
-		Text nametext = go.namebar.GetComponentInChildren<Text>();
-
-		print ("nametext " + nametext);
-
-		nametext.text = name; 
-		*/
-		//go.gameObject.AddComponent<Canvas> (go.namebar);
-		//namebar.position = new Vector3(player.position.x, player.position.y * SomeYOffset, player.position.z);
-		//namebar.transform.position = Camera.main.WorldToViewportPoint(go.transform.position) + new Vector3(0f, 0.05f, 0f); // Change the 0.05f value to some other value for desired height
 
 		//
 		// scale it
@@ -333,7 +380,81 @@ public class Character : MonoBehaviour {
 		//print("child count:"+go.gameObject.transform.childCount);
 		//print("child count:"+go.transform.childCount);
 		//go.transform.SetParent(CentralController.inst.terrain.transform);
-		go.gameObject.transform.localScale += new Vector3 (1, 1, 1);
+
+		/* this is the right way, but now we dont scale it*/
+		//go.gameObject.transform.localScale += new Vector3 (1, 1, 1);
+
+
+		// set npcHeight
+
+		float size_y = boxCol.bounds.size.y;
+		//得到模型缩放比例
+		//float scal_y = go.gameObject.transform.localScale.y;
+		//它们的乘积就是高度
+		go.setNPCHeight(size_y) ;
+		//print ("npc scale:" + scal_y);
+		//print ("npc size_y:" + size_y);
+		print ("npc height:" + size_y );
+		return go;
+	}
+
+	public static Character loadCharacterPrefab(CharacterSetting cs){
+		string name = cs.name;
+		string prefab_name = cs.prefab_name;
+
+		print ("====>ready to load "+name); 
+
+		// *** way1: create 2d char game object on a grid mesh
+		//Character go = createGridCharGO ();
+
+		// *** way2: create 3d character game object
+		Character go = createGO(name, prefab_name);
+
+
+
+		//
+		// add name bar
+		//
+		Canvas can = CentralController.inst.canvas;
+		GameObject newGO = new GameObject("Text_namebar");
+		newGO.transform.SetParent(can.transform);
+		//Vector2 v2 = go.getHeadPositionInScreen (Camera.main);
+		//newGO.transform.position = new Vector3(v2.x, v2.y, 0);
+		Text text = newGO.AddComponent<Text>();
+		Font ArialFont = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
+		text.font = ArialFont;
+		text.fontSize = 24;
+		text.material = ArialFont.material;
+		text.text = name;
+		//text.color = Color.blue;
+		//text.color = go.faction.color;
+		text.alignment = TextAnchor.MiddleCenter;
+		RectTransform rt = newGO.GetComponent<RectTransform> ();
+		rt.sizeDelta =  new Vector2 (200, rt.sizeDelta.y);
+		go.namebar = newGO;
+
+		go.namebar.transform.localScale = new Vector3 (1, 1, 1);
+
+		// make sure it's render under panel
+		go.namebar.transform.SetSiblingIndex (0);
+
+
+
+		/*go.namebar = Instantiate(Resources.Load<Canvas>("Prefabs/CharName"));
+		print ("namebar " + go.namebar);
+
+		//Text nametext = go.namebar.GetComponent<Text>();
+		Text nametext = go.namebar.GetComponentInChildren<Text>();
+
+		print ("nametext " + nametext);
+
+		nametext.text = name; 
+		*/
+		//go.gameObject.AddComponent<Canvas> (go.namebar);
+		//namebar.position = new Vector3(player.position.x, player.position.y * SomeYOffset, player.position.z);
+		//namebar.transform.position = Camera.main.WorldToViewportPoint(go.transform.position) + new Vector3(0f, 0.05f, 0f); // Change the 0.05f value to some other value for desired height
+
+
 		//go.AddComponent<Character> ();
 		//return go.GetComponent<Character>();
 		return go;
@@ -391,18 +512,29 @@ public class Character : MonoBehaviour {
 		_model.localPosition = Vector3.zero;
 		_model.localRotation = Quaternion.identity;
 */
+		print ("start of " + name);
+		print ("setting = " + setting);
 		hp = setting.maxhp/2;
 
 		//得到摄像机对象
 		camera = Camera.main;
 
+		//initNPCHeight ();
+
+	}
+
+	void setNPCHeight(float h){
+		npcHeight = h;
+	}
+
+	void initNPCHeight(){
 		//注解1
 		//得到模型原始高度
 		float size_y = gameObject.GetComponent<Collider>().bounds.size.y;
 		//得到模型缩放比例
-		float scal_y = transform.localScale.y;
+		//float scal_y = transform.localScale.y;
 		//它们的乘积就是高度
-		npcHeight = (size_y *scal_y) ;
+		npcHeight = (size_y ) ;
 	}
 	
 	// Update is called once per frame
@@ -412,7 +544,7 @@ public class Character : MonoBehaviour {
 		Vector2 uiOffset = new Vector2((float)canvas.sizeDelta.x / 2f, (float)canvas.sizeDelta.y / 2f);
 
 		//Vector2 position = camera.WorldToScreenPoint (transform.position);
-		Vector3 pos = new Vector3(transform.position.x, transform.position.y + npcHeight + 0.05f, transform.position.z);
+		Vector3 pos = new Vector3(transform.position.x, transform.position.y + npcHeight + 0.3f, transform.position.z);
 		Vector2 ViewportPosition = Camera.main.WorldToViewportPoint(pos);
 		Vector2 proportionalPosition = new Vector2(ViewportPosition.x * canvas.sizeDelta.x, ViewportPosition.y * canvas.sizeDelta.y );
 		namebar.transform.localPosition = proportionalPosition - uiOffset;

@@ -29,7 +29,7 @@ public class CharacterController : MonoBehaviour {
 		CentralController cc = CentralController.inst;
 		TerrainGrid tg = cc.getGlobalTerainGrid ();
 		tg.inactiveAllCells ();
-		Vector2 pos = cc.getPosFromCord (go.transform.position);
+		Vector2 pos = CentralController.getPosFromCord (go.transform.position);
 		print ("ch pos:" + pos);
 		int range = this.GetComponent<Character>().max_move_distance;
 		int start_x = (int)(pos.x - range);

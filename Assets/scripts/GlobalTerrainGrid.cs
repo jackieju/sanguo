@@ -307,8 +307,8 @@ public class GloalTerrainGrid : MonoBehaviour {
 
 		Physics.Raycast(terrain.transform.TransformPoint(transform.TransformPoint(origin)), Vector3.down, out hitInfo, Mathf.Infinity, layerMask);
 		bool a = hitInfo.collider == null;
-		if (hitInfo.collider)
-			print("isvalid:("+x+","+z+"):"+hitInfo.collider.gameObject.name);
+		//if (hitInfo.collider)
+		//	print("isvalid:("+x+","+z+"):"+hitInfo.collider.gameObject.name);
 		//if (hitInfo.collider == null || hitInfo.collider.gameObject.name == "Terrain")
 		//return true;
 
