@@ -12,10 +12,13 @@ public class Faction : MonoBehaviour {
 	public int remaining_operation_number = 1;
 	public Faction(FactionSetting fs){
 		this.fs = fs;
-		remaining_operation_number = fs.max_operation_number;
+		reset_ron ();
 	}
 
 
+	public void reset_ron(){
+		remaining_operation_number = fs.max_operation_number;
+	}
 	public void setPos(Vector3 position, Vector3 rotate){
 		pos = position;
 		rot = rotate;

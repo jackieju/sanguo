@@ -74,74 +74,81 @@ public class InputHandler : MonoBehaviour {
 		stop_propagate = false;
 		click_nowhere = true;
 
+		CentralController cc = CentralController.inst;
 		if (Input.GetMouseButtonDown (0))
 			pos_on_button_down = Input.mousePosition;
 		
 		if (!moving && 0 == moving_view) { // not in moving view
+			
 			if (CentralController.inst.current_operating_faction == 0 
 				&& CentralController.inst.factions[0].remaining_operation_number > 0
-				&& CentralController.inst.state == 100) { // character selected
-				print ("mouse up222");
-				if (Input.GetMouseButtonUp (0)) {
-					CentralController cc = CentralController.inst;
-					print ("mouse up111");
-					print (Input.mousePosition);
+				&& CentralController.inst.state == 100 // character selected
+			) { 
+				print ("mouse up222:"+CentralController.inst.current_operating_faction);
+				Character cur_char = cc.currentSelectedChar.GetComponent<Character> ();
 
-					RaycastHit hit = new RaycastHit ();
-					Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-					/*if (Physics.Raycast (ray, out hit)) {
-					print (hit.collider.gameObject);
-					print (hit.transform.gameObject);
-				}*/
+				if (cur_char.faction.factionID == 0) { 
 
-					if (cc.terrain.GetComponent<Collider> ().Raycast (ray, out hit, Mathf.Infinity)) {
-						Vector2 pos = CentralController.getPosFromCord (hit.point);
-						print ("click cell " + pos);
+					if (Input.GetMouseButtonUp (0)) {
+						print ("mouse up111");
+						print (Input.mousePosition);
 
-						//
-						// try to move player's hero here
-						//
-						bool can_move = false;
-						Character me = cc.currentSelectedChar.GetComponent<Character> ();
-						Character enemy = check_enemy_on_pos (pos);
-						print ("enemy is " + enemy);
-						int kill_ret = 0;
-						if (enemy != null) {
-							kill_ret = kill (me, enemy);
-							print ("kill_ret is " + kill_ret);
+						RaycastHit hit = new RaycastHit ();
+						Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+						/*if (Physics.Raycast (ray, out hit)) {
+						print (hit.collider.gameObject);
+						print (hit.transform.gameObject);
+						}*/
 
-							if (kill_ret == 1) {
-								//Destroy (enemy.gameObject);
-								can_move = true;
-							}
+						if (cc.terrain.GetComponent<Collider> ().Raycast (ray, out hit, Mathf.Infinity)) {
+							Vector2 pos = CentralController.getPosFromCord (hit.point);
+							print ("click cell " + pos);
 
-						} else {
-							int r = validatePos (me, (int)(pos.x), (int)(pos.y));
-							print ("validatePos is " + r);
+							//
+							// try to move player's hero here
+							//
+							bool can_move = false;
+							Character me = cc.currentSelectedChar.GetComponent<Character> ();
+							Character enemy = check_enemy_on_pos (pos);
+							print ("enemy is " + enemy);
+							int kill_ret = 0;
+							if (enemy != null) {
+								kill_ret = kill (me, enemy);
+								print ("kill_ret is " + kill_ret);
 
-							if (r != -2) // not in range
-								click_nowhere = false;
-							if (r == 0) { // valid
-								can_move = true;
-								print ("can move");
-
+								if (kill_ret == 1) {
+									//Destroy (enemy.gameObject);
+									can_move = true;
+								}
 
 							} else {
-								print ("can move2");
+								int r = validatePos (me, (int)(pos.x), (int)(pos.y));
+								print ("validatePos is " + r);
 
+								if (r != -2) // not in range
+								click_nowhere = false;
+								if (r == 0) { // valid
+									can_move = true;
+									print ("can move");
+
+
+								} else {
+									print ("can move2");
+
+								}
 							}
-						}
-						if (can_move) {
-							print ("ok move hero");
-							cc.cmd_move_char (0, cc.currentSelectedChar.GetComponent<Character> (), pos);
-							//cc.currentSelectedChar.transform.position = cc.getCordFromPos (pos);
-							cc.state = 0;
-							print ("hero moved");
-							TerrainGrid tg = cc.getGlobalTerainGrid ();
-							tg.inactiveAllCells ();
-							stop_propagate = true;
-							// fight if enemy is nearby in real-time strategy mode
-							// check_fight (cc.currentSelectedChar.GetComponent<Character>(), pos);
+							if (can_move) {
+								print ("ok move hero");
+								cc.cmd_move_char (0, cc.currentSelectedChar.GetComponent<Character> (), pos);
+								//cc.currentSelectedChar.transform.position = cc.getCordFromPos (pos);
+								cc.state = 0;
+								print ("hero moved");
+								TerrainGrid tg = cc.getGlobalTerainGrid ();
+								tg.inactiveAllCells ();
+								stop_propagate = true;
+								// fight if enemy is nearby in real-time strategy mode
+								// check_fight (cc.currentSelectedChar.GetComponent<Character>(), pos);
+							}
 						}
 					}
 				}
@@ -352,7 +359,8 @@ public class InputHandler : MonoBehaviour {
 						//hideTerrainGrid (CentralController.inst.currentSelectedChar);
 					}
 					CentralController.inst.currentSelectedChar = hit.transform.gameObject;
-					showTerrainGrid (CentralController.inst.currentSelectedChar);
+					if ( cc.currentSelectedChar.GetComponent<Character>().getFaction().factionID == 0)
+						showTerrainGrid (CentralController.inst.currentSelectedChar);
 					CentralController.inst.char_panel.SetActive(true);
 					CentralController.inst.updatePropertyPanel (CentralController.inst.currentSelectedChar.GetComponent<Character>());
 

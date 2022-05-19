@@ -220,10 +220,11 @@ public class Character : MonoBehaviour {
 
 
 	public static Character load(CharacterSetting cs){
-
+        print("===>load char from cs:" + cs);
 		Character ret = Character.loadCharacterPrefab(cs);
 		ret.setting = cs;
 		ret.name = cs.name;
+        print("===>char name:" + cs.name);
 		ret.max_move_distance = cs.movability;
 		ret.hp =  ret.maxhp = cs.maxhp;
 		ret.mp = ret.maxmp = cs.maxmp;

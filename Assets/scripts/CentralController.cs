@@ -37,6 +37,8 @@ public class CentralController : MonoBehaviour {
 	private bool camera_zoomed = false;
 
 	public int current_operating_faction = 0;
+	 
+	public int game_state = 0; // 100: ened
 
 	public TerrainGrid getGlobalTerainGrid(){
 		if (_tg != null)
@@ -91,12 +93,22 @@ public class CentralController : MonoBehaviour {
 
 	}
 
+	// tell turn timer current player already finish operation
+	public void current_player_completed(){
+		faction_completed (current_operating_faction);
+	}
+
+	public void faction_completed(int factionId){
+		gameObject.GetComponent<TurnTimer> ().setNext ();
+		factions [factionId].reset_ron ();
+	}
+
 	public void cmd_move_char(int faction, Character c, Vector2 pos){
 		_move_char (c, pos);
 		factions [faction].remaining_operation_number --;
 
 		if (factions [faction].remaining_operation_number == 0) {
-			gameObject.GetComponent<TurnTimer> ().setNext ();
+			current_player_completed ();
 		}
 			
 	}
@@ -106,7 +118,7 @@ public class CentralController : MonoBehaviour {
 		//c.transform.position = getCordFromPos((int)pos.x, (int)pos.y);
 
 		// move with speed
-		StartCoroutine (MoveOverSeconds (c.gameObject, getCordFromPos((int)pos.x, (int)pos.y), 1f));
+		StartCoroutine (MoveOverSeconds (c.gameObject, getCordFromPos((int)pos.x, (int)pos.y), 0.5f));
 
 		//c.UpdateMesh((int)pos.x, (int)pos.y);
 
@@ -280,8 +292,16 @@ public class CentralController : MonoBehaviour {
 		}
 
 		//
+		// 
 		// main entry here
+		// 1. Get Game Info(all players' faction/setting)
+		// 2. Load terrian and all objects (UI still in loading page)
+		// 3. Tell server "ready", waiting for server starting command
+		// 4. When getting starting command from server, start this game
 		//
+		//
+
+
 		for (int  i=0;i<FACTION_NUMBER;i++){
 			fs[i] = loadFactionSettingFromUser (i);
 		}
@@ -296,9 +316,35 @@ public class CentralController : MonoBehaviour {
 			loadFactionCharacters (factions [i], fs [i]);
 
 		}
+
+		// TODO should sync clock with server here
+		for (int i = 1; i < fs.Length; i++) {
+			StartCoroutine (AI (i));
+		}
+		// --- START GAME ----
 		player_faction = factions [0];
 		print ("prepareTestData DONE!");
 	}
+
+	IEnumerator AI(int faction_id){
+		while (game_state < 100){
+			if (current_operating_faction == faction_id) {
+				//print ("wait1");
+
+
+				// random move
+				Character ch = factions[faction_id].characters[0];
+				Vector2 pos = getPosFromCord (ch.gameObject.transform.position);
+				pos.x += 1;
+				cmd_move_char (faction_id, ch, pos);
+				//current_player_completed ();
+				print ("ai action:"+faction_id);
+
+			}
+			yield return new WaitForSeconds (0.5f);
+		}
+	}
+
 	// Use this for initialization
 	void Start () {
 
@@ -361,13 +407,22 @@ public class CentralController : MonoBehaviour {
 		npc_desc.text = cs.desc;
 	}
 
+	// main camera original position:(5.654085, 12.81541, 10.45499)
+	// main camera original rotate: 45.034, 49.846, -0.001
+	// main camera original scale: 1, 1, 1
+
 	public void toggleZoom(){
-		Vector3 delta2 = new Vector3 (0, 60, 0);
+		Vector3 delta2 = new Vector3 (0, 40, 0);
 		if (!camera_zoomed) {
-			transform.position += delta2;
+			//transform.Rotate (-15, 0, 0);
+			//transform.position += delta2;
+			transform.position -= transform.forward * 30.0f;
 			camera_zoomed = true;
 		} else {
-			transform.position -= delta2;
+			//transform.Rotate (15, 0, 0);
+			//transform.position -= delta2;
+			transform.position += transform.forward * 30.0f;
+
 			camera_zoomed = false;
 		}
 		

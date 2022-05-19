@@ -26,6 +26,7 @@ public class TurnTimer : MonoBehaviour {
 		_next = true;
 	}
 
+	// change turn to next player
 	public void next(){
 		CentralController cc = CentralController.inst;
 

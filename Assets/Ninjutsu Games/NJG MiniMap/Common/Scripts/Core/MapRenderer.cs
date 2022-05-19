@@ -306,7 +306,7 @@ namespace NJG
                                 if (mSize.x >= lastSize.x || mSize.y >= lastSize.y)
                                 {
                                     lastSize = mSize;
-                                    map.mapTexture.Resize((int)mSize.x, (int)mSize.y);
+                                    map.mapTexture.Reinitialize((int)mSize.x, (int)mSize.y);
                                 }
                             }
 
